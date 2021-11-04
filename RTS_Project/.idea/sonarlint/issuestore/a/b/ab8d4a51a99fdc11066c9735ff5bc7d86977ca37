@@ -1,0 +1,11 @@
+
+‚csharpsquid:S101"fRename class 'GameHandler_Setup' to match pascal case naming rules, consider using 'GameHandlerSetup'.(¿œ¡‰
+Mcsharpsquid:S3903"0Move 'GameHandler_Setup' into a named namespace.(¿œ¡‰
+mcsharpsquid:S1104"DMake this field 'private' and encapsulate it in a 'public' property.(›²°ùÿÿÿÿ8€ªš×Î/
+ucsharpsquid:S2223"LChange the visibility of 'gridPathfinding' or make it 'const' or 'readonly'.(›²°ùÿÿÿÿ8€ªš×Î/
+~csharpsquid:S2696*"UMake the enclosing instance method 'static' or remove this set on the 'static' field.(ëô™çúÿÿÿÿ8€ªš×Î/
+Gcsharpsquid:S125#"Remove this commented out code.(œ†ÖÇûÿÿÿÿ8ªš×Î/
+Bcsharpsquid:S125'"Remove this commented out code.(˜’‹¡8ªš×Î/
+Acsharpsquid:S125."Remove this commented out code.(åı©|8ªš×Î/
+Bcsharpsquid:S125K"Remove this commented out code.(û¸Øé8ªš×Î/
+Ccsharpsquid:S125‚"Remove this commented out code.(°Ë‰Ü8ªš×Î/

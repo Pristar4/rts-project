@@ -1,0 +1,34 @@
+
+rcsharpsquid:S1118Ÿ"OAdd a 'protected' constructor or the 'static' keyword to the class declaration.(‘šáÈÿÿÿÿÿ
+ucsharpsquid:S3776Ó"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(Š«Å’ùÿÿÿÿ
+ocsharpsquid:S4524Q"MMove this 'default:' case to the beginning or end of this 'switch' statement.(İ–Ò˜ÿÿÿÿÿ
+ocsharpsquid:S4524b"MMove this 'default:' case to the beginning or end of this 'switch' statement.(İ–Ò˜ÿÿÿÿÿ
+;csharpsquid:S2933‚"Make 'anims' 'readonly'.(úîÔİÿÿÿÿÿ
+gcsharpsquid:S1104•"DMake this field 'private' and encapsulate it in a 'public' property.(ÔÆ…íıÿÿÿÿ
+gcsharpsquid:S1104—"DMake this field 'private' and encapsulate it in a 'public' property.(§ììÜÿÿÿÿÿ
+gcsharpsquid:S1104™"DMake this field 'private' and encapsulate it in a 'public' property.(«Û øÿÿÿÿ
+Wcsharpsquid:S3400ˆ"9Remove this method and declare a constant for this value.(Úµ¸å
+pcsharpsquid:S2223•"MChange the visibility of 'dMinion_IdleDown' or make it 'const' or 'readonly'.(ÔÆ…íıÿÿÿÿ
+pcsharpsquid:S2223—"MChange the visibility of 'DefaultAnimation' or make it 'const' or 'readonly'.(§ììÜÿÿÿÿÿ
+dcsharpsquid:S2223™"AChange the visibility of 'None' or make it 'const' or 'readonly'.(«Û øÿÿÿÿ
+?csharpsquid:S1643¬"Use a StringBuilder instead.(ï½üÅüÿÿÿÿ
+Scsharpsquid:S1144 "5Remove the unused private method 'SaveResourcesTree'.(ÄŒËæ
+Zcsharpsquid:S1144Ó"7Remove the unused private method 'LoadOldVersionSaves'.(Š«Å’ùÿÿÿÿ
+xcsharpsquid:S4487"ZRemove this unread private field 'disableOverwrite' or refactor the code to use its value.(İ¤™Û
+Hcsharpsquid:S1075‚"%Remove this hardcoded path-delimiter.(óîßÏÿÿÿÿÿ
+Ccsharpsquid:S1075“"%Remove this hardcoded path-delimiter.(©˜Î¹
+[csharpsquid:S1117Ş"8Rename 'anims' which hides the field with the same name.(Í§ğúÿÿÿÿ
+@csharpsquid:S125"Remove this commented out code.(ÚøÉ³üÿÿÿÿ
+@csharpsquid:S125 "Remove this commented out code.(ıƒŸúøÿÿÿÿ
+<csharpsquid:S125´"Remove this commented out code.(”²·½
+Acsharpsquid:S125Ì"Remove this commented out code.(ãÛ„ùÿÿÿÿ
+Acsharpsquid:S125Ï"Remove this commented out code.(—íÑúÿÿÿÿ
+<csharpsquid:S125Ô"Remove this commented out code.(¡øî„
+;csharpsquid:S125†"Remove this commented out code.(‚øê|
+Acsharpsquid:S125ğ"Remove this commented out code.(ó±îõşÿÿÿÿ
+<csharpsquid:S125é"Remove this commented out code.(¦¶‡
+<csharpsquid:S125²"Remove this commented out code.(‡¢ˆ
+;csharpsquid:S125´"Remove this commented out code.(¸ˆ‡
+Acsharpsquid:S125»"Remove this commented out code.(”¥£æùÿÿÿÿ
+<csharpsquid:S125½"Remove this commented out code.(û»ë›
+Acsharpsquid:S125ª"Remove this commented out code.(±¦Æğşÿÿÿÿ
