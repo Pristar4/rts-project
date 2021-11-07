@@ -1,62 +1,80 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿#region Info
+// -----------------------------------------------------------------------
+// PlayerRTS.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using CodeMonkey.Utils;
+using UnityEngine;
+#endregion
+public class PlayerRTS : MonoBehaviour
+{
 
-public class PlayerRTS : MonoBehaviour {
+	private CharacterRTS selectedCharacter;
 
-    public static PlayerRTS Instance { get; private set; }
+	public static PlayerRTS Instance { get; private set; }
 
-    private CharacterRTS selectedCharacter;
+	private void Awake()
+	{
+		Instance = this;
+	}
 
-    private void Awake() {
-        Instance = this;
-    }
+	private void Update()
+	{
+		if (Input.GetMouseButtonDown(0))
+		{
+			var collider2DArray
+					= Physics2D.OverlapPointAll(
+							UtilsClass.GetMouseWorldPosition());
 
-    public void SetSelectedCharacter(CharacterRTS selectedCharacter) {
-        this.selectedCharacter?.SetSelectedGameObjectVisible(false);
+			// Deselect Character
+			SetSelectedCharacter(null);
 
-        this.selectedCharacter = selectedCharacter;
+			foreach (var collider2D in collider2DArray)
+			{
+				var characterRTS = collider2D.GetComponent<CharacterRTS>();
+				if (characterRTS != null && characterRTS.IsPlayer())
+					SetSelectedCharacter(characterRTS);
+			}
+		}
 
-        this.selectedCharacter?.SetSelectedGameObjectVisible(true);
-    }
+		if (Input.GetMouseButtonDown(1))
+			if (selectedCharacter != null)
+			{
+				var collider2DArray
+						= Physics2D.OverlapPointAll(
+								UtilsClass.GetMouseWorldPosition());
 
-    private void Update() {
-        if (Input.GetMouseButtonDown(0)) {
-            Collider2D[] collider2DArray = Physics2D.OverlapPointAll(UtilsClass.GetMouseWorldPosition());
+				var doMoveAction = true;
 
-            // Deselect Character
-            SetSelectedCharacter(null);
+				foreach (var collider2D in collider2DArray)
+				{
+					var characterRTS = collider2D.GetComponent<CharacterRTS>();
+					if (characterRTS != null && !characterRTS.IsPlayer())
+					{
+						selectedCharacter.SetTarget(characterRTS);
+						doMoveAction = false;
+						break;
+					}
+				}
 
-            foreach (Collider2D collider2D in collider2DArray) {
-                CharacterRTS characterRTS = collider2D.GetComponent<CharacterRTS>();
-                if (characterRTS != null && characterRTS.IsPlayer()) {
-                    SetSelectedCharacter(characterRTS);
-                }
-            }
-        }
+				if (doMoveAction)
+				{
+					selectedCharacter.SetTarget(null);
+					selectedCharacter.SetMovePosition(
+							UtilsClass.GetMouseWorldPosition());
+				}
+			}
+	}
 
-        if (Input.GetMouseButtonDown(1)) {
-            if (selectedCharacter != null) {
-                Collider2D[] collider2DArray = Physics2D.OverlapPointAll(UtilsClass.GetMouseWorldPosition());
+	public void SetSelectedCharacter(CharacterRTS selectedCharacter)
+	{
+		this.selectedCharacter?.SetSelectedGameObjectVisible(false);
 
-                bool doMoveAction = true;
+		this.selectedCharacter = selectedCharacter;
 
-                foreach (Collider2D collider2D in collider2DArray) {
-                    CharacterRTS characterRTS = collider2D.GetComponent<CharacterRTS>();
-                    if (characterRTS != null && !characterRTS.IsPlayer()) {
-                        selectedCharacter.SetTarget(characterRTS);
-                        doMoveAction = false;
-                        break;
-                    }
-                }
-
-                if (doMoveAction) {
-                    selectedCharacter.SetTarget(null);
-                    selectedCharacter.SetMovePosition(UtilsClass.GetMouseWorldPosition());
-                }
-            }
-        }
-    }
-
+		this.selectedCharacter?.SetSelectedGameObjectVisible(true);
+	}
 }

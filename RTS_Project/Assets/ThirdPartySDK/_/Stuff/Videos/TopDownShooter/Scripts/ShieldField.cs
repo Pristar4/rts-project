@@ -1,75 +1,81 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
+﻿#region Info
+// -----------------------------------------------------------------------
+// ShieldField.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+#endregion
 
-namespace TopDownShooter {
-    public class ShieldField : MonoBehaviour {
+namespace TopDownShooter
+{
+	public class ShieldField : MonoBehaviour
+	{
 
-        [Serializable]
-        public class ShieldFieldTransformerPowerLines {
-            public Transform[] powerLineArray;
-        }
-
-        [Serializable]
-        public class ShieldFieldTransformerLink {
-            public ShieldFieldTransformer shieldFieldTransformer;
-            public ShieldFieldTransformerPowerLines shieldFieldTransformerPowerLines;
-        }
-
-        public ShieldFieldTransformerLink[] shieldFieldTransformerLinkArray;
+		public ShieldFieldTransformerLink[] shieldFieldTransformerLinkArray;
 
 
-        private void Start() {
-            foreach (ShieldFieldTransformerLink shieldFieldTransformerLink in shieldFieldTransformerLinkArray) {
-                shieldFieldTransformerLink.shieldFieldTransformer.OnDestroyed += ShieldFieldTransformer_OnDestroyed;
-            }
-        }
+		private void Start()
+		{
+			foreach (var shieldFieldTransformerLink in
+					shieldFieldTransformerLinkArray)
+				shieldFieldTransformerLink.shieldFieldTransformer.OnDestroyed
+						+= ShieldFieldTransformer_OnDestroyed;
+		}
 
-        private void ShieldFieldTransformer_OnDestroyed(object sender, EventArgs e) {
-            ShieldFieldTransformer shieldFieldTransformer = sender as ShieldFieldTransformer;
-            ShieldFieldTransformerLink shieldFieldTransformerLink = GetShieldFieldTransformerLink(shieldFieldTransformer);
-            foreach (Transform powerLine in shieldFieldTransformerLink.shieldFieldTransformerPowerLines.powerLineArray) {
-                Destroy(powerLine.gameObject);
-            }
-            TestAllTransformersDead();
-        }
+		private void
+				ShieldFieldTransformer_OnDestroyed(object sender, EventArgs e)
+		{
+			var shieldFieldTransformer = sender as ShieldFieldTransformer;
+			var shieldFieldTransformerLink
+					= GetShieldFieldTransformerLink(shieldFieldTransformer);
+			foreach (var powerLine in shieldFieldTransformerLink
+					.shieldFieldTransformerPowerLines
+					.powerLineArray) Destroy(powerLine.gameObject);
+			TestAllTransformersDead();
+		}
 
-        public ShieldFieldTransformerLink GetShieldFieldTransformerLink(ShieldFieldTransformer shieldFieldTransformer) {
-            foreach (ShieldFieldTransformerLink shieldFieldTransformerLink in shieldFieldTransformerLinkArray) {
-                if (shieldFieldTransformerLink.shieldFieldTransformer == shieldFieldTransformer) {
-                    return shieldFieldTransformerLink;
-                }
-            }
-            return null;
-        }
+		public ShieldFieldTransformerLink GetShieldFieldTransformerLink(
+				ShieldFieldTransformer shieldFieldTransformer)
+		{
+			foreach (var shieldFieldTransformerLink in
+					shieldFieldTransformerLinkArray)
+				if (shieldFieldTransformerLink.shieldFieldTransformer ==
+				    shieldFieldTransformer)
+					return shieldFieldTransformerLink;
+			return null;
+		}
 
-        private void TestAllTransformersDead() {
-            bool allDead = true;
-            foreach (ShieldFieldTransformerLink shieldFieldTransformerLink in shieldFieldTransformerLinkArray) {
-                if (shieldFieldTransformerLink.shieldFieldTransformer.IsAlive()) {
-                    allDead = false;
-                    break;
-                }
-            }
+		private void TestAllTransformersDead()
+		{
+			var allDead = true;
+			foreach (var shieldFieldTransformerLink in
+					shieldFieldTransformerLinkArray)
+				if (shieldFieldTransformerLink.shieldFieldTransformer.IsAlive())
+				{
+					allDead = false;
+					break;
+				}
 
-            if (allDead) {
-                // All transformers are dead!
-                Destroy(gameObject);
-            }
-        }
+			if (allDead) // All transformers are dead!
+				Destroy(gameObject);
+		}
 
-    }
+		[Serializable]
+		public class ShieldFieldTransformerPowerLines
+		{
+			public Transform[] powerLineArray;
+		}
+
+		[Serializable]
+		public class ShieldFieldTransformerLink
+		{
+			public ShieldFieldTransformer shieldFieldTransformer;
+			public ShieldFieldTransformerPowerLines
+					shieldFieldTransformerPowerLines;
+		}
+	}
 }

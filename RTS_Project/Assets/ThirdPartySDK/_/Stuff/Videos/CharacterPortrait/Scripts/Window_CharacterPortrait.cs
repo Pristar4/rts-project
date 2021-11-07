@@ -1,106 +1,123 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System;
-using System.Collections;
+﻿#region Info
+// -----------------------------------------------------------------------
+// Window_CharacterPortrait.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System.Collections.Generic;
+using CodeMonkey.Utils;
 using UnityEngine;
 using UnityEngine.UI;
-using CodeMonkey.Utils;
+#endregion
+public class Window_CharacterPortrait : MonoBehaviour
+{
 
-public class Window_CharacterPortrait : MonoBehaviour {
+	private static Dictionary<Character, Window_CharacterPortrait>
+			windowDictionary;
 
-    private static Dictionary<Character, Window_CharacterPortrait> windowDictionary;
+	private Transform cameraTransform;
+	private Character character;
+	private Text conText;
+	private Text dexText;
+	private Transform experienceBar;
+	private Transform followTransform;
 
-    private Transform cameraTransform;
-    private Transform followTransform;
-    private Character character;
-    
-    private Text levelText;
-    private Text strText;
-    private Text dexText;
-    private Text conText;
-    private Text wisText;
-    private Transform experienceBar;
+	private Text levelText;
+	private Text strText;
+	private Text wisText;
 
-    private void Awake() {
-        cameraTransform = transform.Find("camera");
+	private void Awake()
+	{
+		cameraTransform = transform.Find("camera");
 
-        transform.Find("closeBtn").GetComponent<Button_UI>().ClickFunc = DestroyWindow;
-        
-        levelText = transform.Find("levelText").GetComponent<Text>();
-        strText = transform.Find("strText").GetComponent<Text>();
-        dexText = transform.Find("dexText").GetComponent<Text>();
-        conText = transform.Find("conText").GetComponent<Text>();
-        wisText = transform.Find("wisText").GetComponent<Text>();
+		transform.Find("closeBtn").GetComponent<Button_UI>().ClickFunc
+				= DestroyWindow;
 
-        experienceBar = transform.Find("experienceBar");
-    }
+		levelText = transform.Find("levelText").GetComponent<Text>();
+		strText = transform.Find("strText").GetComponent<Text>();
+		dexText = transform.Find("dexText").GetComponent<Text>();
+		conText = transform.Find("conText").GetComponent<Text>();
+		wisText = transform.Find("wisText").GetComponent<Text>();
 
-    private void Update() {
-        cameraTransform.position = new Vector3(followTransform.position.x, followTransform.position.y, Camera.main.transform.position.z);
-    }
+		experienceBar = transform.Find("experienceBar");
+	}
 
-    private void UpdateExperienceBar() {
-        experienceBar.localScale = new Vector3(character.GetExperienceNormalized(), 1, 1);
-    }
+	private void Update()
+	{
+		cameraTransform.position = new Vector3(followTransform.position.x,
+				followTransform.position.y, Camera.main.transform.position.z);
+	}
 
-    private void UpdateStats() {
-        levelText.text = "Level: " + character.level.ToString();
-        strText.text = character.STR.ToString();
-        dexText.text = character.DEX.ToString();
-        conText.text = character.CON.ToString();
-        wisText.text = character.WIS.ToString();
-    }
+	private void UpdateExperienceBar()
+	{
+		experienceBar.localScale
+				= new Vector3(character.GetExperienceNormalized(), 1, 1);
+	}
 
-    private void Show(Character character) {
-        this.character = character;
-        followTransform = character.transform;
+	private void UpdateStats()
+	{
+		levelText.text = "Level: " + character.level;
+		strText.text = character.STR.ToString();
+		dexText.text = character.DEX.ToString();
+		conText.text = character.CON.ToString();
+		wisText.text = character.WIS.ToString();
+	}
 
-        RenderTexture renderTexture = new RenderTexture(512, 512, 16);
-        transform.Find("camera").GetComponent<Camera>().targetTexture = renderTexture;
-        transform.Find("rawImage").GetComponent<RawImage>().texture = renderTexture;
+	private void Show(Character character)
+	{
+		this.character = character;
+		followTransform = character.transform;
 
-        transform.Find("nameText").GetComponent<Text>().text = character.name;
-        
-        UpdateExperienceBar();
-        UpdateStats();
+		var renderTexture = new RenderTexture(512, 512, 16);
+		transform.Find("camera").GetComponent<Camera>().targetTexture
+				= renderTexture;
+		transform.Find("rawImage").GetComponent<RawImage>().texture
+				= renderTexture;
 
-        character.OnExperienceGained += delegate (object sender, EventArgs e) { UpdateExperienceBar(); };
-        character.OnLeveledUp += delegate (object sender, EventArgs e) {
-            UpdateExperienceBar();
-            UpdateStats();
-        };
-    }
+		transform.Find("nameText").GetComponent<Text>().text = character.name;
 
-    private void DestroyWindow() {
-        windowDictionary.Remove(character);
-        Destroy(gameObject);
-    }
+		UpdateExperienceBar();
+		UpdateStats();
 
-    public static void Show_Static(Character character) {
-        if (windowDictionary == null) {
-            windowDictionary = new Dictionary<Character, Window_CharacterPortrait>();
-        }
+		character.OnExperienceGained += delegate { UpdateExperienceBar(); };
+		character.OnLeveledUp += delegate
+		{
+			UpdateExperienceBar();
+			UpdateStats();
+		};
+	}
 
-        if (!windowDictionary.ContainsKey(character)) {
-            Transform windowCharacterPortraitTransform = Instantiate(CharacterPortrait_GameHandler.instance.pfWindow_CharacterPortrait);
-            windowCharacterPortraitTransform.SetParent(CharacterPortrait_GameHandler.instance.canvas.transform, false);
-            windowCharacterPortraitTransform.GetComponent<RectTransform>().anchoredPosition = new Vector2(UnityEngine.Random.Range(-500, 500), UnityEngine.Random.Range(-200, 200));
+	private void DestroyWindow()
+	{
+		windowDictionary.Remove(character);
+		Destroy(gameObject);
+	}
 
-            Window_CharacterPortrait windowCharacterPortrait = windowCharacterPortraitTransform.GetComponent<Window_CharacterPortrait>();
-            windowCharacterPortrait.Show(character);
+	public static void Show_Static(Character character)
+	{
+		if (windowDictionary == null)
+			windowDictionary
+					= new Dictionary<Character, Window_CharacterPortrait>();
 
-            windowDictionary[character] = windowCharacterPortrait;
-        }
-    }
+		if (!windowDictionary.ContainsKey(character))
+		{
+			var windowCharacterPortraitTransform = Instantiate(
+					CharacterPortrait_GameHandler.instance
+							.pfWindow_CharacterPortrait);
+			windowCharacterPortraitTransform.SetParent(
+					CharacterPortrait_GameHandler.instance.canvas.transform,
+					false);
+			windowCharacterPortraitTransform.GetComponent<RectTransform>()
+					.anchoredPosition = new Vector2(Random.Range(-500, 500),
+					Random.Range(-200, 200));
+
+			var windowCharacterPortrait = windowCharacterPortraitTransform
+					.GetComponent<Window_CharacterPortrait>();
+			windowCharacterPortrait.Show(character);
+
+			windowDictionary[character] = windowCharacterPortrait;
+		}
+	}
 }

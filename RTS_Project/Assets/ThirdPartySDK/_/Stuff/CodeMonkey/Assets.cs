@@ -1,46 +1,46 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading the Code Monkey Utilities
-    I hope you find them useful in your projects
-    If you have any questions use the contact form
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// Assets.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
 
-namespace CodeMonkey {
+namespace CodeMonkey
+{
 
-    /*
-     * Global Asset references
-     * Edit Asset references in the prefab CodeMonkey/Resources/CodeMonkeyAssets
-     * */
-    public class Assets : MonoBehaviour {
+	/*
+	 * Global Asset references
+	 * Edit Asset references in the prefab CodeMonkey/Resources/CodeMonkeyAssets
+	 * */
+	public class Assets : MonoBehaviour
+	{
 
-        // Internal instance reference
-        private static Assets _i; 
-
-        // Instance reference
-        public static Assets i {
-            get {
-                if (_i == null) _i = Instantiate(Resources.Load<Assets>("CodeMonkeyAssets")); 
-                return _i; 
-            }
-        }
+		// Internal instance reference
+		private static Assets _i;
 
 
-        // All references
-        
-        public Sprite s_White;
-        public Sprite s_Circle;
+		// All references
 
-        public Material m_White;
+		public Sprite s_White;
+		public Sprite s_Circle;
 
-    }
+		public Material m_White;
+
+		// Instance reference
+		public static Assets i
+		{
+			get
+			{
+				if (_i == null)
+					_i = Instantiate(
+							Resources.Load<Assets>("CodeMonkeyAssets"));
+				return _i;
+			}
+		}
+	}
 
 }

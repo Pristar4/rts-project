@@ -1,134 +1,145 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
+﻿#region Info
+// -----------------------------------------------------------------------
+// HotkeyAbilitySystem.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#endregion
+public class HotkeyAbilitySystem
+{
 
-public class HotkeyAbilitySystem {
+	public enum AbilityType
+	{
+		Pistol,
+		Shotgun,
+		Sword,
+		Punch,
+		HealthPotion,
+		ManaPotion
+	}
+	private readonly List<HotkeyAbility> extraHotkeyAbilityList;
 
-    public event EventHandler OnAbilityListChanged;
+	//private PlayerSwapWeapons player;
+	private readonly List<HotkeyAbility> hotkeyAbilityList;
 
-    public enum AbilityType {
-        Pistol,
-        Shotgun,
-        Sword,
-        Punch,
-        HealthPotion,
-        ManaPotion,
-    }
+	public HotkeyAbilitySystem()
+	{
+		hotkeyAbilityList = new List<HotkeyAbility>();
+		extraHotkeyAbilityList = new List<HotkeyAbility>();
 
-    //private PlayerSwapWeapons player;
-    private List<HotkeyAbility> hotkeyAbilityList;
-    private List<HotkeyAbility> extraHotkeyAbilityList;
+		// Health Potion
+		hotkeyAbilityList.Add(new HotkeyAbility
+		{
+			abilityType = AbilityType.HealthPotion,
+			activateAbilityAction = () => { } // player.ConsumeHealthPotion()
+		});
 
-    public HotkeyAbilitySystem() {
-        hotkeyAbilityList = new List<HotkeyAbility>();
-        extraHotkeyAbilityList = new List<HotkeyAbility>();
 
-        // Health Potion
-        hotkeyAbilityList.Add(new HotkeyAbility {
-            abilityType = AbilityType.HealthPotion,
-            activateAbilityAction = () => { }// player.ConsumeHealthPotion()
-        });
+		// Mana Potion
+		extraHotkeyAbilityList.Add(new HotkeyAbility
+		{
+			abilityType = AbilityType.ManaPotion,
+			activateAbilityAction = () => { } // player.ConsumeManaPotion()
+		});
+	}
 
-        
-        // Mana Potion
-        extraHotkeyAbilityList.Add(new HotkeyAbility { 
-            abilityType = AbilityType.ManaPotion, 
-            activateAbilityAction = () => { }// player.ConsumeManaPotion()
-        });
-    }
+	public event EventHandler OnAbilityListChanged;
 
-    public void Update() {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) {
-            hotkeyAbilityList[0].activateAbilityAction();
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2)) {
-            hotkeyAbilityList[1].activateAbilityAction();
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha3)) {
-            hotkeyAbilityList[2].activateAbilityAction();
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha4)) {
-            hotkeyAbilityList[3].activateAbilityAction();
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha5)) {
-            hotkeyAbilityList[4].activateAbilityAction();
-        }
-    }
-    
-    public List<HotkeyAbility> GetHotkeyAbilityList() {
-        return hotkeyAbilityList;
-    }
-    
-    public List<HotkeyAbility> GetExtraHotkeyAbilityList() {
-        return extraHotkeyAbilityList;
-    }
+	public void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.Alpha1))
+			hotkeyAbilityList[0].activateAbilityAction();
+		if (Input.GetKeyDown(KeyCode.Alpha2))
+			hotkeyAbilityList[1].activateAbilityAction();
+		if (Input.GetKeyDown(KeyCode.Alpha3))
+			hotkeyAbilityList[2].activateAbilityAction();
+		if (Input.GetKeyDown(KeyCode.Alpha4))
+			hotkeyAbilityList[3].activateAbilityAction();
+		if (Input.GetKeyDown(KeyCode.Alpha5))
+			hotkeyAbilityList[4].activateAbilityAction();
+	}
 
-    public void SwapAbility(int abilityIndexA, int abilityIndexB) {
-        HotkeyAbility hotkeyAbility = hotkeyAbilityList[abilityIndexA];
-        hotkeyAbilityList[abilityIndexA] = hotkeyAbilityList[abilityIndexB];
-        hotkeyAbilityList[abilityIndexB] = hotkeyAbility;
-        OnAbilityListChanged?.Invoke(this, EventArgs.Empty);
-    }
-    
-    public void SwapAbility(HotkeyAbility hotkeyAbilityA, HotkeyAbility hotkeyAbilityB) {
-        if (extraHotkeyAbilityList.Contains(hotkeyAbilityA)) {
-            // A is on Extra List
-            int indexB = hotkeyAbilityList.IndexOf(hotkeyAbilityB);
-            hotkeyAbilityList[indexB] = hotkeyAbilityA;
+	public List<HotkeyAbility> GetHotkeyAbilityList()
+	{
+		return hotkeyAbilityList;
+	}
 
-            extraHotkeyAbilityList.Remove(hotkeyAbilityA);
-            extraHotkeyAbilityList.Add(hotkeyAbilityB);
-        } else {
-            if (extraHotkeyAbilityList.Contains(hotkeyAbilityB)) {
-                // B is on the Extra List
-                int indexA = hotkeyAbilityList.IndexOf(hotkeyAbilityA);
-                hotkeyAbilityList[indexA] = hotkeyAbilityB;
+	public List<HotkeyAbility> GetExtraHotkeyAbilityList()
+	{
+		return extraHotkeyAbilityList;
+	}
 
-                extraHotkeyAbilityList.Remove(hotkeyAbilityB);
-                extraHotkeyAbilityList.Add(hotkeyAbilityA);
-            } else {
-                // Neither are on the Extra List
-                int indexA = hotkeyAbilityList.IndexOf(hotkeyAbilityA);
-                int indexB = hotkeyAbilityList.IndexOf(hotkeyAbilityB);
-                HotkeyAbility tmp = hotkeyAbilityList[indexA];
-                hotkeyAbilityList[indexA] = hotkeyAbilityList[indexB];
-                hotkeyAbilityList[indexB] = tmp;
-            }
-        }
+	public void SwapAbility(int abilityIndexA, int abilityIndexB)
+	{
+		var hotkeyAbility = hotkeyAbilityList[abilityIndexA];
+		hotkeyAbilityList[abilityIndexA] = hotkeyAbilityList[abilityIndexB];
+		hotkeyAbilityList[abilityIndexB] = hotkeyAbility;
+		OnAbilityListChanged?.Invoke(this, EventArgs.Empty);
+	}
 
-        OnAbilityListChanged?.Invoke(this, EventArgs.Empty);
-    }
+	public void SwapAbility(HotkeyAbility hotkeyAbilityA,
+	                        HotkeyAbility hotkeyAbilityB)
+	{
+		if (extraHotkeyAbilityList.Contains(hotkeyAbilityA))
+		{
+			// A is on Extra List
+			var indexB = hotkeyAbilityList.IndexOf(hotkeyAbilityB);
+			hotkeyAbilityList[indexB] = hotkeyAbilityA;
 
-    /*
-     * Represents a single Hotkey Ability of any Type
-     * */
-    public class HotkeyAbility {
-        public AbilityType abilityType;
-        public Action activateAbilityAction;
+			extraHotkeyAbilityList.Remove(hotkeyAbilityA);
+			extraHotkeyAbilityList.Add(hotkeyAbilityB);
+		}
+		else
+		{
+			if (extraHotkeyAbilityList.Contains(hotkeyAbilityB))
+			{
+				// B is on the Extra List
+				var indexA = hotkeyAbilityList.IndexOf(hotkeyAbilityA);
+				hotkeyAbilityList[indexA] = hotkeyAbilityB;
 
-        public Sprite GetSprite() {
-            switch (abilityType) {
-            default:
-            case AbilityType.HealthPotion:  return null;// Testing.Instance.healthPotionSprite;
-            }
-        }
+				extraHotkeyAbilityList.Remove(hotkeyAbilityB);
+				extraHotkeyAbilityList.Add(hotkeyAbilityA);
+			}
+			else
+			{
+				// Neither are on the Extra List
+				var indexA = hotkeyAbilityList.IndexOf(hotkeyAbilityA);
+				var indexB = hotkeyAbilityList.IndexOf(hotkeyAbilityB);
+				var tmp = hotkeyAbilityList[indexA];
+				hotkeyAbilityList[indexA] = hotkeyAbilityList[indexB];
+				hotkeyAbilityList[indexB] = tmp;
+			}
+		}
 
-        public override string ToString() {
-            return abilityType.ToString();
-        }
-    }
+		OnAbilityListChanged?.Invoke(this, EventArgs.Empty);
+	}
 
+	/*
+	 * Represents a single Hotkey Ability of any Type
+	 * */
+	public class HotkeyAbility
+	{
+		public AbilityType abilityType;
+		public Action activateAbilityAction;
+
+		public Sprite GetSprite()
+		{
+			switch (abilityType)
+			{
+				default:
+				case AbilityType.HealthPotion:
+					return null; // Testing.Instance.healthPotionSprite;
+			}
+		}
+
+		public override string ToString()
+		{
+			return abilityType.ToString();
+		}
+	}
 }

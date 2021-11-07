@@ -1,32 +1,37 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// PixelateAnimated.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class PixelateAnimated : MonoBehaviour
+{
 
-public class PixelateAnimated : MonoBehaviour {
+	[SerializeField] private Material material;
 
-    [SerializeField] private Material material;
+	private float pixelateAmount;
+	private float pixelateAmountTarget;
 
-    private float pixelateAmount;
-    private float pixelateAmountTarget;
+	private void Start()
+	{
+		pixelateAmountTarget = 0f;
+		pixelateAmount = pixelateAmountTarget;
+	}
 
-    private void Start() {
-        pixelateAmountTarget = 0f;
-        pixelateAmount = pixelateAmountTarget;
-    }
+	private void Update()
+	{
+		var pixelateSpeed = 20f;
+		pixelateAmount = Mathf.Lerp(pixelateAmount, pixelateAmountTarget,
+				Time.deltaTime * pixelateSpeed);
+		if (pixelateAmount <= .01f) pixelateAmount = 0f;
 
-    private void Update() {
-        float pixelateSpeed = 20f;
-        pixelateAmount = Mathf.Lerp(pixelateAmount, pixelateAmountTarget, Time.deltaTime * pixelateSpeed);
-        if (pixelateAmount <= .01f) pixelateAmount = 0f;
-        
-        if (Input.GetKeyDown(KeyCode.T)) {
-            pixelateAmountTarget = .7f;
-        }
-        if (Input.GetKeyDown(KeyCode.Y)) {
-            pixelateAmountTarget = 0f;
-        }
+		if (Input.GetKeyDown(KeyCode.T)) pixelateAmountTarget = .7f;
+		if (Input.GetKeyDown(KeyCode.Y)) pixelateAmountTarget = 0f;
 
-        material.SetFloat("_PixelateAmount", pixelateAmount);
-    }
-
+		material.SetFloat("_PixelateAmount", pixelateAmount);
+	}
 }

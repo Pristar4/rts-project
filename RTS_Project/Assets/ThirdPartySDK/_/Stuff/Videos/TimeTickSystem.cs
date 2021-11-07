@@ -1,55 +1,68 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// TimeTickSystem.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
+using System;
 using UnityEngine;
-using CodeMonkey;
+#endregion
+public static class TimeTickSystem
+{
 
-public static class TimeTickSystem {
+	private const float TICK_TIMER_MAX = .2f;
 
-    public class OnTickEventArgs : EventArgs {
-        public int tick;
-    }
-    
-    public static event EventHandler<OnTickEventArgs> OnTick;
-    public static event EventHandler<OnTickEventArgs> OnTick_5;
+	private static GameObject timeTickSystemGameObject;
+	private static int tick;
 
-    private const float TICK_TIMER_MAX = .2f;
+	public static event EventHandler<OnTickEventArgs> OnTick;
+	public static event EventHandler<OnTickEventArgs> OnTick_5;
 
-    private static GameObject timeTickSystemGameObject;
-    private static int tick;
+	public static void Create()
+	{
+		if (timeTickSystemGameObject == null)
+		{
+			timeTickSystemGameObject = new GameObject("TimeTickSystem");
+			timeTickSystemGameObject.AddComponent<TimeTickSystemObject>();
+		}
+	}
 
-    public static void Create() {
-        if (timeTickSystemGameObject == null) {
-            timeTickSystemGameObject = new GameObject("TimeTickSystem");
-            timeTickSystemGameObject.AddComponent<TimeTickSystemObject>();
-        }
-    }
+	public static int GetTick()
+	{
+		return tick;
+	}
 
-    public static int GetTick() {
-        return tick;
-    }
+	public class OnTickEventArgs : EventArgs
+	{
+		public int tick;
+	}
 
-    private class TimeTickSystemObject : MonoBehaviour {
-        
-        private float tickTimer;
+	private class TimeTickSystemObject : MonoBehaviour
+	{
 
-        private void Awake() {
-            tick = 0;
-        }
+		private float tickTimer;
 
-        private void Update() {
-            tickTimer += Time.deltaTime;
-            if (tickTimer >= TICK_TIMER_MAX) {
-                tickTimer -= TICK_TIMER_MAX;
-                tick++;
-                if (OnTick != null) OnTick(this, new OnTickEventArgs { tick = tick });
+		private void Awake()
+		{
+			tick = 0;
+		}
 
-                if (tick % 5 == 0) {
-                    if (OnTick_5 != null) OnTick_5(this, new OnTickEventArgs { tick = tick });
-                }
-            }
-        }
+		private void Update()
+		{
+			tickTimer += Time.deltaTime;
+			if (tickTimer >= TICK_TIMER_MAX)
+			{
+				tickTimer -= TICK_TIMER_MAX;
+				tick++;
+				if (OnTick != null)
+					OnTick(this, new OnTickEventArgs { tick = tick });
 
-    }
-
+				if (tick % 5 == 0)
+					if (OnTick_5 != null)
+						OnTick_5(this, new OnTickEventArgs { tick = tick });
+			}
+		}
+	}
 }

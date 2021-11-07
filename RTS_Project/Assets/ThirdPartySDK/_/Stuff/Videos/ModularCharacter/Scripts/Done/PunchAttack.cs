@@ -1,57 +1,55 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// PunchAttack.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
-using CodeMonkey.Utils;
-using V_AnimationSystem;
+#endregion
+public class PunchAttack : MonoBehaviour, IAttack
+{
 
-public class PunchAttack : MonoBehaviour, IAttack {
+	private Character_Base characterBase;
+	private State state;
 
-    private enum State {
-        Normal,
-        Attacking
-    }
+	private void Awake()
+	{
+		characterBase = GetComponent<Character_Base>();
+		SetStateNormal();
+	}
 
-    private Character_Base characterBase;
-    private State state;
+	public void Attack(Vector3 attackDir)
+	{
+		// Attack
+		SetStateAttacking();
 
-    private void Awake() {
-        characterBase = GetComponent<Character_Base>();
-        SetStateNormal();
-    }
+		//Vector3 attackDir = (UtilsClass.GetMouseWorldPosition() - GetPosition()).normalized;
 
-    private void SetStateAttacking() {
-        state = State.Attacking;
-        GetComponent<IMoveVelocity>().Disable();
-    }
+		characterBase.PlayAttackAnimation(attackDir, SetStateNormal);
+	}
 
-    private void SetStateNormal() {
-        state = State.Normal;
-        GetComponent<IMoveVelocity>().Enable();
-    }
+	private void SetStateAttacking()
+	{
+		state = State.Attacking;
+		GetComponent<IMoveVelocity>().Disable();
+	}
 
-    public void Attack(Vector3 attackDir) {
-        // Attack
-        SetStateAttacking();
-            
-        //Vector3 attackDir = (UtilsClass.GetMouseWorldPosition() - GetPosition()).normalized;
+	private void SetStateNormal()
+	{
+		state = State.Normal;
+		GetComponent<IMoveVelocity>().Enable();
+	}
 
-        characterBase.PlayAttackAnimation(attackDir, SetStateNormal);
-    }
+	private Vector3 GetPosition()
+	{
+		return transform.position;
+	}
 
-    private Vector3 GetPosition() {
-        return transform.position;
-    }
-
+	private enum State
+	{
+		Normal,
+		Attacking
+	}
 }

@@ -1,41 +1,46 @@
-/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
-using UnityEngine;
-using System.Collections;
+#region Info
+// -----------------------------------------------------------------------
+// LastMoveTo.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System.Collections.Generic;
+#endregion
 //using myNameSpace;
 
-namespace GridPathfindingSystem {
+namespace GridPathfindingSystem
+{
 
-    public class LastMoveTo {
+	public class LastMoveTo
+	{
+		public UnitMovement.PathCallback callback;
+		public GridPathfinding.UnitMovementCallbackType callbackType;
 
-        public List<MapPos> mapPos;
-        public GridPathfinding.UnitMovementCallbackType callbackType;
-        public object obj;
-        public UnitMovement.PathCallback callback;
+		public List<MapPos> mapPos;
+		public object obj;
 
-        public LastMoveTo(List<MapPos> _mapPos, GridPathfinding.UnitMovementCallbackType _callbackType, object _obj, UnitMovement.PathCallback _callback) {
-            mapPos = _mapPos;
-            callbackType = _callbackType;
-            obj = _obj;
-            callback = _callback;
-        }
-        public LastMoveTo(MapPos _mapPos, GridPathfinding.UnitMovementCallbackType _callbackType, object _obj, UnitMovement.PathCallback _callback) {
-            mapPos = new List<MapPos>() { _mapPos };
-            callbackType = _callbackType;
-            obj = _obj;
-            callback = _callback;
-        }
-    }
+		public LastMoveTo(List<MapPos> _mapPos,
+		                  GridPathfinding.UnitMovementCallbackType
+				                  _callbackType,
+		                  object _obj, UnitMovement.PathCallback _callback)
+		{
+			mapPos = _mapPos;
+			callbackType = _callbackType;
+			obj = _obj;
+			callback = _callback;
+		}
+		public LastMoveTo(MapPos _mapPos,
+		                  GridPathfinding.UnitMovementCallbackType
+				                  _callbackType,
+		                  object _obj, UnitMovement.PathCallback _callback)
+		{
+			mapPos = new List<MapPos> { _mapPos };
+			callbackType = _callbackType;
+			obj = _obj;
+			callback = _callback;
+		}
+	}
 
 }

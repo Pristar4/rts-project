@@ -1,35 +1,27 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// ShopTriggerCollider.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class ShopTriggerCollider : MonoBehaviour
+{
 
-public class ShopTriggerCollider : MonoBehaviour {
+	[SerializeField] private UI_Shop uiShop;
 
-    [SerializeField] private UI_Shop uiShop;
+	private void OnTriggerEnter2D(Collider2D collider)
+	{
+		var shopCustomer = collider.GetComponent<IShopCustomer>();
+		if (shopCustomer != null) uiShop.Show(shopCustomer);
+	}
 
-    private void OnTriggerEnter2D(Collider2D collider) {
-        IShopCustomer shopCustomer = collider.GetComponent<IShopCustomer>();
-        if (shopCustomer != null) {
-            uiShop.Show(shopCustomer);
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collider) {
-        IShopCustomer shopCustomer = collider.GetComponent<IShopCustomer>();
-        if (shopCustomer != null) {
-            uiShop.Hide();
-        }
-    }
-
+	private void OnTriggerExit2D(Collider2D collider)
+	{
+		var shopCustomer = collider.GetComponent<IShopCustomer>();
+		if (shopCustomer != null) uiShop.Hide();
+	}
 }

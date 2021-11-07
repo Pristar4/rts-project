@@ -1,35 +1,31 @@
-/* 
-    ------------------- Code Monkey -------------------
+#region Info
+// -----------------------------------------------------------------------
+// PathQueue.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+namespace GridPathfindingSystem
+{
 
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
+	public class PathQueue
+	{
+		public GridPathfinding.OnPathCallback callback;
+		public int endX;
+		public int endY;
 
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
-using UnityEngine;
-using System.Collections;
+		public int startX;
+		public int startY;
 
-namespace GridPathfindingSystem {
-
-    public class PathQueue {
-
-        public int startX;
-        public int startY;
-        public int endX;
-        public int endY;
-        public GridPathfinding.OnPathCallback callback;
-
-        public PathQueue(int _startX, int _startY, int _endX, int _endY, GridPathfinding.OnPathCallback _callback) {
-            startX = _startX;
-            startY = _startY;
-            endX = _endX;
-            endY = _endY;
-            callback = _callback;
-        }
-    }
+		public PathQueue(int _startX, int _startY, int _endX, int _endY,
+		                 GridPathfinding.OnPathCallback _callback)
+		{
+			startX = _startX;
+			startY = _startY;
+			endX = _endX;
+			endY = _endY;
+			callback = _callback;
+		}
+	}
 
 }

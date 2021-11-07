@@ -1,59 +1,59 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// FlyingBody.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class FlyingBody : MonoBehaviour
+{
+	private float eulerZ;
 
-public class FlyingBody : MonoBehaviour {
+	private Vector3 flyDirection;
+	private float spawnBloodTimer;
+	private float timer;
 
-    public static void Create(Transform prefab, Vector3 spawnPosition, Vector3 flyDirection) {
-        Transform flyingBodyTransform = Instantiate(prefab, spawnPosition, Quaternion.identity);
-        FlyingBody flyingBody = flyingBodyTransform.gameObject.AddComponent<FlyingBody>();
-        flyingBody.Setup(flyDirection);
-    }
+	private void Update()
+	{
+		var flySpeed = 400f;
+		transform.position += flyDirection * flySpeed * Time.deltaTime;
 
-    private Vector3 flyDirection;
-    private float timer;
-    private float eulerZ;
-    private float spawnBloodTimer;
+		var scaleSpeed = 7f;
+		transform.localScale += Vector3.one * scaleSpeed * Time.deltaTime;
 
-    private void Setup(Vector3 flyDirection) {
-        this.flyDirection = flyDirection;
-        transform.localScale = Vector3.one * 2f;
-        eulerZ = 0f;
-    }
+		var eulerSpeed = 360f * 4f;
+		eulerZ += eulerSpeed * Time.deltaTime;
+		transform.localEulerAngles = new Vector3(0, 0, eulerZ);
 
-    private void Update() {
-        float flySpeed = 400f;
-        transform.position += flyDirection * flySpeed * Time.deltaTime;
+		spawnBloodTimer -= Time.deltaTime;
+		if (spawnBloodTimer <= 0f)
+		{
+			var spawnBloodTimerMax = .016f;
+			spawnBloodTimer = spawnBloodTimerMax;
+			Blood_Handler.SpawnBlood(5, transform.position, flyDirection * -1f);
+		}
 
-        float scaleSpeed = 7f;
-        transform.localScale += Vector3.one * scaleSpeed * Time.deltaTime;
+		timer += Time.deltaTime;
+		if (timer >= 1f) Destroy(gameObject);
+	}
 
-        float eulerSpeed = 360f * 4f;
-        eulerZ += eulerSpeed * Time.deltaTime;
-        transform.localEulerAngles = new Vector3(0, 0, eulerZ);
+	public static void Create(Transform prefab, Vector3 spawnPosition,
+	                          Vector3 flyDirection)
+	{
+		var flyingBodyTransform
+				= Instantiate(prefab, spawnPosition, Quaternion.identity);
+		var flyingBody
+				= flyingBodyTransform.gameObject.AddComponent<FlyingBody>();
+		flyingBody.Setup(flyDirection);
+	}
 
-        spawnBloodTimer -= Time.deltaTime;
-        if (spawnBloodTimer <= 0f) {
-            float spawnBloodTimerMax = .016f;
-            spawnBloodTimer = spawnBloodTimerMax;
-            Blood_Handler.SpawnBlood(5, transform.position, flyDirection * -1f);
-        }
-
-        timer += Time.deltaTime;
-        if (timer >= 1f) {
-            Destroy(gameObject);
-        }
-    }
+	private void Setup(Vector3 flyDirection)
+	{
+		this.flyDirection = flyDirection;
+		transform.localScale = Vector3.one * 2f;
+		eulerZ = 0f;
+	}
 }

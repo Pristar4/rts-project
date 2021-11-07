@@ -1,258 +1,305 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this Code Monkey project
-    I hope you find it useful in your own projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
+﻿#region Info
+// -----------------------------------------------------------------------
+// CM_GameHandler.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using CodeMonkey;
 using CodeMonkey.Utils;
+using UnityEngine;
+#endregion
 
-namespace CM_TaskSystem {
+namespace CM_TaskSystem
+{
 
-    public class CM_GameHandler : MonoBehaviour {
-        
-        [SerializeField] private Sprite floorShellsSprite;
-        [SerializeField] private Sprite pistolSprite;
-        [SerializeField] private Sprite whitePixelSprite;
-        
-        private CM_TaskSystem<Task> taskSystem;
-        public static CM_TaskSystem<TransporterTask> transporterTaskSystem;
+	public class CM_GameHandler : MonoBehaviour
+	{
+		public static CM_TaskSystem<TransporterTask> transporterTaskSystem;
 
-        private List<WeaponSlot> weaponSlotList;
+		[SerializeField] private Sprite floorShellsSprite;
+		[SerializeField] private Sprite pistolSprite;
+		[SerializeField] private Sprite whitePixelSprite;
 
-        private void Start() {
-            taskSystem = new CM_TaskSystem<Task>();
-            transporterTaskSystem = new CM_TaskSystem<TransporterTask>();
+		private CM_TaskSystem<Task> taskSystem;
 
-            CM_IWorker worker = null;// CM_Worker.Create(new Vector3(450, 500));
-            CM_WorkerTaskAI workerTaskAI = worker.GetGameObject().AddComponent<CM_WorkerTaskAI>();
-            workerTaskAI.Setup(worker, taskSystem);
+		private List<WeaponSlot> weaponSlotList;
 
-            worker = null;// CM_Worker.Create(new Vector3(550, 500));
-            CM_WorkerTransporterTaskAI workerTransporterTaskAI = worker.GetGameObject().AddComponent<CM_WorkerTransporterTaskAI>();
-            workerTransporterTaskAI.Setup(worker, transporterTaskSystem);
+		private void Start()
+		{
+			taskSystem = new CM_TaskSystem<Task>();
+			transporterTaskSystem = new CM_TaskSystem<TransporterTask>();
 
-            weaponSlotList = new List<WeaponSlot>();
-            GameObject weaponSlotGameObject = SpawnWeaponSlot(new Vector3(500, 500));
-            weaponSlotList.Add(new WeaponSlot(weaponSlotGameObject.transform));
-            
-            weaponSlotGameObject = SpawnWeaponSlot(new Vector3(500, 490));
-            weaponSlotList.Add(new WeaponSlot(weaponSlotGameObject.transform));
-            
-            weaponSlotGameObject = SpawnWeaponSlot(new Vector3(500, 510));
-            weaponSlotList.Add(new WeaponSlot(weaponSlotGameObject.transform));
-        }
+			CM_IWorker
+					worker = null; // CM_Worker.Create(new Vector3(450, 500));
+			var workerTaskAI
+					= worker.GetGameObject().AddComponent<CM_WorkerTaskAI>();
+			workerTaskAI.Setup(worker, taskSystem);
 
-        private void Update() {
-            if (Input.GetMouseButtonDown(0)) {
-                // Spawn a pistol and queue the task to take it to a slot when possible
-                GameObject pistolGameObject = SpawnPistolSprite(UtilsClass.GetMouseWorldPosition());
-                taskSystem.EnqueueTask(() => {
-                    foreach (WeaponSlot weaponSlot in weaponSlotList) {
-                        if (weaponSlot.IsEmpty()) {
-                            // If the weapon slot is empty lets create the task to take it there
-                            weaponSlot.SetHasWeaponIncoming(true);
-                            Task task = new Task.TakeWeaponToWeaponSlot {
-                                weaponPosition = pistolGameObject.transform.position,
-                                weaponSlotPosition = weaponSlot.GetPosition(),
-                                grabWeapon = (CM_WorkerTaskAI weaponWorkerTaskAI) => {
-                                    // Grab weapon, parent the weapon to the worker
-                                    pistolGameObject.transform.SetParent(weaponWorkerTaskAI.transform);
-                                },
-                                dropWeapon = () => { 
-                                    // Drop weapon, set parent back to null
-                                    pistolGameObject.transform.SetParent(null);
-                                    // Notify the weapon slot that the weapon has arrived
-                                    weaponSlot.SetWeaponTransform(pistolGameObject.transform);
-                                },
-                            };
-                            return task;
-                        }
-                        // Weapon slot not empty, keep looking
-                    }
-                    // No weapon slot is empty, try again later
-                    return null;
-                });
-                //CMDebug.TextPopupMouse("Add Task: ShellFloorCleanUp, 5s delay");
-                //SpawnFloorShellsWithTask(UtilsClass.GetMouseWorldPosition());
-            }
-            if (Input.GetMouseButtonDown(1)) {
-                CMDebug.TextPopupMouse("Add Task: MoveToPosition");
-                //CM_TaskSystem.Task task = new CM_TaskSystem.Task.Victory { };
-                //taskSystem.AddTask(task);
-                Task task = new Task.MoveToPosition { targetPosition = UtilsClass.GetMouseWorldPosition() };
-                taskSystem.AddTask(task);
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha1)) {
-                CMDebug.TextPopupMouse("Add Task: Victory");
-                Task task = new Task.Victory { };
-                taskSystem.AddTask(task);
-            }
-        }
+			worker = null; // CM_Worker.Create(new Vector3(550, 500));
+			var workerTransporterTaskAI = worker.GetGameObject()
+					.AddComponent<CM_WorkerTransporterTaskAI>();
+			workerTransporterTaskAI.Setup(worker, transporterTaskSystem);
 
+			weaponSlotList = new List<WeaponSlot>();
+			var weaponSlotGameObject = SpawnWeaponSlot(new Vector3(500, 500));
+			weaponSlotList.Add(new WeaponSlot(weaponSlotGameObject.transform));
 
-        private GameObject SpawnFloorShells(Vector3 position) {
-            GameObject gameObject = new GameObject("FloorShells", typeof(SpriteRenderer));
-            gameObject.GetComponent<SpriteRenderer>().sprite = floorShellsSprite;
-            gameObject.transform.position = position;
-            return gameObject;
-        }
+			weaponSlotGameObject = SpawnWeaponSlot(new Vector3(500, 490));
+			weaponSlotList.Add(new WeaponSlot(weaponSlotGameObject.transform));
 
-        private void SpawnFloorShellsWithTask(Vector3 position) {
-            GameObject floorShellsGameObject = SpawnFloorShells(position);
-            SpriteRenderer floorShellsSpriteRenderer = floorShellsGameObject.GetComponent<SpriteRenderer>();
+			weaponSlotGameObject = SpawnWeaponSlot(new Vector3(500, 510));
+			weaponSlotList.Add(new WeaponSlot(weaponSlotGameObject.transform));
+		}
 
-            float cleanUpTime = Time.time + 5f;
-            taskSystem.EnqueueTask(() => {
-                if (Time.time >= cleanUpTime) {
-                    Task task = new Task.ShellFloorCleanUp {
-                        targetPosition = floorShellsGameObject.transform.position,
-                        cleanUpAction = () => {
-                            // Clean Up Action, reduce alpha every frame until zero
-                            float alpha = 1f;
-                            FunctionUpdater.Create(() => {
-                                alpha -= Time.deltaTime;
-                                floorShellsSpriteRenderer.color = new Color(1, 1, 1, alpha);
-                                if (alpha <= 0f) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
-                            });
-                        }
-                    };
-                    return task;
-                } else {
-                    return null;
-                }
-            });
-        }
-
-        private GameObject SpawnPistolSprite(Vector3 position) {
-            GameObject gameObject = new GameObject("PistolSprite", typeof(SpriteRenderer));
-            gameObject.GetComponent<SpriteRenderer>().sprite = pistolSprite;
-            gameObject.GetComponent<SpriteRenderer>().sortingOrder = 10000;
-            gameObject.transform.position = position;
-            gameObject.transform.localScale = new Vector3(7, 7);
-            return gameObject;
-        }
-
-        private GameObject SpawnWeaponSlot(Vector3 position) {
-            GameObject gameObject = new GameObject("WeaponSlot", typeof(SpriteRenderer));
-            gameObject.GetComponent<SpriteRenderer>().sprite = whitePixelSprite;
-            gameObject.GetComponent<SpriteRenderer>().color = new Color(.5f , .5f, .5f);
-            gameObject.transform.position = position;
-            gameObject.transform.localScale = new Vector3(4, 4);
-            return gameObject;
-        }
+		private void Update()
+		{
+			if (Input.GetMouseButtonDown(0))
+			{
+				// Spawn a pistol and queue the task to take it to a slot when possible
+				var pistolGameObject
+						= SpawnPistolSprite(UtilsClass.GetMouseWorldPosition());
+				taskSystem.EnqueueTask(() =>
+				{
+					foreach (var weaponSlot in weaponSlotList)
+						if (weaponSlot.IsEmpty())
+						{
+							// If the weapon slot is empty lets create the task to take it there
+							weaponSlot.SetHasWeaponIncoming(true);
+							Task task = new Task.TakeWeaponToWeaponSlot
+							{
+								weaponPosition
+										= pistolGameObject.transform.position,
+								weaponSlotPosition = weaponSlot.GetPosition(),
+								grabWeapon = weaponWorkerTaskAI =>
+								{
+									// Grab weapon, parent the weapon to the worker
+									pistolGameObject.transform.SetParent(
+											weaponWorkerTaskAI
+													.transform);
+								},
+								dropWeapon = () =>
+								{
+									// Drop weapon, set parent back to null
+									pistolGameObject.transform.SetParent(null);
+									// Notify the weapon slot that the weapon has arrived
+									weaponSlot.SetWeaponTransform(
+											pistolGameObject.transform);
+								}
+							};
+							return task;
+						}
+					// Weapon slot not empty, keep looking
+					// No weapon slot is empty, try again later
+					return null;
+				});
+				//CMDebug.TextPopupMouse("Add Task: ShellFloorCleanUp, 5s delay");
+				//SpawnFloorShellsWithTask(UtilsClass.GetMouseWorldPosition());
+			}
+			if (Input.GetMouseButtonDown(1))
+			{
+				CMDebug.TextPopupMouse("Add Task: MoveToPosition");
+				//CM_TaskSystem.Task task = new CM_TaskSystem.Task.Victory { };
+				//taskSystem.AddTask(task);
+				Task task = new Task.MoveToPosition
+						{ targetPosition = UtilsClass.GetMouseWorldPosition() };
+				taskSystem.AddTask(task);
+			}
+			if (Input.GetKeyDown(KeyCode.Alpha1))
+			{
+				CMDebug.TextPopupMouse("Add Task: Victory");
+				Task task = new Task.Victory();
+				taskSystem.AddTask(task);
+			}
+		}
 
 
-        private class WeaponSlot {
+		private GameObject SpawnFloorShells(Vector3 position)
+		{
+			var gameObject
+					= new GameObject("FloorShells", typeof(SpriteRenderer));
+			gameObject.GetComponent<SpriteRenderer>().sprite
+					= floorShellsSprite;
+			gameObject.transform.position = position;
+			return gameObject;
+		}
 
-            private Transform weaponSlotTransform;
-            private Transform weaponTransform;
-            private bool hasWeaponIncoming;
+		private void SpawnFloorShellsWithTask(Vector3 position)
+		{
+			var floorShellsGameObject = SpawnFloorShells(position);
+			var floorShellsSpriteRenderer
+					= floorShellsGameObject.GetComponent<SpriteRenderer>();
 
-            public WeaponSlot(Transform weaponSlotTransform) {
-                this.weaponSlotTransform = weaponSlotTransform;
-                SetWeaponTransform(null);
-            }
+			var cleanUpTime = Time.time + 5f;
+			taskSystem.EnqueueTask(() =>
+			{
+				if (Time.time >= cleanUpTime)
+				{
+					Task task = new Task.ShellFloorCleanUp
+					{
+						targetPosition
+								= floorShellsGameObject.transform.position,
+						cleanUpAction = () =>
+						{
+							// Clean Up Action, reduce alpha every frame until zero
+							var alpha = 1f;
+							FunctionUpdater.Create(() =>
+							{
+								alpha -= Time.deltaTime;
+								floorShellsSpriteRenderer.color
+										= new Color(1, 1, 1, alpha);
+								if (alpha <= 0f)
+									return true;
+								return false;
+							});
+						}
+					};
+					return task;
+				}
+				return null;
+			});
+		}
 
-            public bool IsEmpty() {
-                return weaponTransform == null && !hasWeaponIncoming;
-            }
+		private GameObject SpawnPistolSprite(Vector3 position)
+		{
+			var gameObject
+					= new GameObject("PistolSprite", typeof(SpriteRenderer));
+			gameObject.GetComponent<SpriteRenderer>().sprite = pistolSprite;
+			gameObject.GetComponent<SpriteRenderer>().sortingOrder = 10000;
+			gameObject.transform.position = position;
+			gameObject.transform.localScale = new Vector3(7, 7);
+			return gameObject;
+		}
 
-            public void SetHasWeaponIncoming(bool hasWeaponIncoming) {
-                this.hasWeaponIncoming = hasWeaponIncoming;
-                UpdateSprite();
-            }
+		private GameObject SpawnWeaponSlot(Vector3 position)
+		{
+			var gameObject
+					= new GameObject("WeaponSlot", typeof(SpriteRenderer));
+			gameObject.GetComponent<SpriteRenderer>().sprite = whitePixelSprite;
+			gameObject.GetComponent<SpriteRenderer>().color
+					= new Color(.5f, .5f, .5f);
+			gameObject.transform.position = position;
+			gameObject.transform.localScale = new Vector3(4, 4);
+			return gameObject;
+		}
 
-            public void SetWeaponTransform(Transform weaponTransform) {
-                this.weaponTransform = weaponTransform;
-                hasWeaponIncoming = false;
-                UpdateSprite();
 
-                if (weaponTransform != null) {
-                    TransporterTask.TakeWeaponFromSlotToPosition task = new TransporterTask.TakeWeaponFromSlotToPosition { 
-                        weaponSlotPosition = GetPosition(),
-                        targetPosition = new Vector3(600, 500),
-                        grabWeapon = (CM_WorkerTransporterTaskAI weaponWorkerTaskAI) => {
-                            // Grab weapon, parent the weapon to the worker
-                            weaponTransform.SetParent(weaponWorkerTaskAI.transform);
-                            SetWeaponTransform(null);
-                        },
-                        dropWeapon = () => { 
-                            // Drop weapon, set parent back to null
-                            weaponTransform.SetParent(null);
-                        },
-                    };
-                    transporterTaskSystem.AddTask(task);
-                }
-                /*FunctionTimer.Create(() => {
-                    if (weaponTransform != null) {
-                        Destroy(weaponTransform.gameObject);
-                        SetWeaponTransform(null);
-                    }
-                }, 4f);*/
-            }
+		private class WeaponSlot
+		{
 
-            public Vector3 GetPosition() {
-                return weaponSlotTransform.position;
-            }
+			private readonly Transform weaponSlotTransform;
+			private bool hasWeaponIncoming;
+			private Transform weaponTransform;
 
-            public void UpdateSprite() {
-                weaponSlotTransform.GetComponent<SpriteRenderer>().color = IsEmpty() ? Color.grey : Color.red;
-            }
+			public WeaponSlot(Transform weaponSlotTransform)
+			{
+				this.weaponSlotTransform = weaponSlotTransform;
+				SetWeaponTransform(null);
+			}
 
-        }
+			public bool IsEmpty()
+			{
+				return weaponTransform == null && !hasWeaponIncoming;
+			}
 
-        public class Task : TaskBase {
+			public void SetHasWeaponIncoming(bool hasWeaponIncoming)
+			{
+				this.hasWeaponIncoming = hasWeaponIncoming;
+				UpdateSprite();
+			}
 
-            // Worker moves to Target Position
-            public class MoveToPosition : Task {
-                public Vector3 targetPosition;
-            }
+			public void SetWeaponTransform(Transform weaponTransform)
+			{
+				this.weaponTransform = weaponTransform;
+				hasWeaponIncoming = false;
+				UpdateSprite();
 
-            // Workers plays Victory animation
-            public class Victory : Task {
-            }
+				if (weaponTransform != null)
+				{
+					var task = new TransporterTask.TakeWeaponFromSlotToPosition
+					{
+						weaponSlotPosition = GetPosition(),
+						targetPosition = new Vector3(600, 500),
+						grabWeapon = weaponWorkerTaskAI =>
+						{
+							// Grab weapon, parent the weapon to the worker
+							weaponTransform.SetParent(weaponWorkerTaskAI
+									.transform);
+							SetWeaponTransform(null);
+						},
+						dropWeapon = () =>
+						{
+							// Drop weapon, set parent back to null
+							weaponTransform.SetParent(null);
+						}
+					};
+					transporterTaskSystem.AddTask(task);
+				}
+				/*FunctionTimer.Create(() => {
+				    if (weaponTransform != null) {
+				        Destroy(weaponTransform.gameObject);
+				        SetWeaponTransform(null);
+				    }
+				}, 4f);*/
+			}
 
-            // Worker moves to target position, plays clean up animation, and executes clean up action
-            public class ShellFloorCleanUp : Task {
-                public Vector3 targetPosition;
-                public Action cleanUpAction;
-            }
+			public Vector3 GetPosition()
+			{
+				return weaponSlotTransform.position;
+			}
 
-            // Worker moves to weapon position, grabs the weapon, takes it to weapon slot, drops weapon
-            public class TakeWeaponToWeaponSlot : Task {
-                public Vector3 weaponPosition;
-                public Action<CM_WorkerTaskAI> grabWeapon;
-                public Vector3 weaponSlotPosition;
-                public Action dropWeapon;
-            }
+			public void UpdateSprite()
+			{
+				weaponSlotTransform.GetComponent<SpriteRenderer>().color
+						= IsEmpty() ? Color.grey : Color.red;
+			}
+		}
 
-        }
+		public class Task : TaskBase
+		{
 
-        public class TransporterTask : TaskBase {
+			// Worker moves to Target Position
+			public class MoveToPosition : Task
+			{
+				public Vector3 targetPosition;
+			}
 
-            public class TakeWeaponFromSlotToPosition : TransporterTask {
-                public Vector3 weaponSlotPosition;
-                public Vector3 targetPosition;
-                public Action<CM_WorkerTransporterTaskAI> grabWeapon;
-                public Action dropWeapon;
-            }
+			// Workers plays Victory animation
+			public class Victory : Task
+			{
+			}
 
-        }
-    }
+			// Worker moves to target position, plays clean up animation, and executes clean up action
+			public class ShellFloorCleanUp : Task
+			{
+				public Action cleanUpAction;
+				public Vector3 targetPosition;
+			}
+
+			// Worker moves to weapon position, grabs the weapon, takes it to weapon slot, drops weapon
+			public class TakeWeaponToWeaponSlot : Task
+			{
+				public Action dropWeapon;
+				public Action<CM_WorkerTaskAI> grabWeapon;
+				public Vector3 weaponPosition;
+				public Vector3 weaponSlotPosition;
+			}
+		}
+
+		public class TransporterTask : TaskBase
+		{
+
+			public class TakeWeaponFromSlotToPosition : TransporterTask
+			{
+				public Action dropWeapon;
+				public Action<CM_WorkerTransporterTaskAI> grabWeapon;
+				public Vector3 targetPosition;
+				public Vector3 weaponSlotPosition;
+			}
+		}
+	}
 
 }

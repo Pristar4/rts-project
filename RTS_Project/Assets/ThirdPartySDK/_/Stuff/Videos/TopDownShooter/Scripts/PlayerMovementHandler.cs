@@ -1,81 +1,80 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// PlayerMovementHandler.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
 
-namespace TopDownShooter {
-    public class PlayerMovementHandler : MonoBehaviour {
+namespace TopDownShooter
+{
+	public class PlayerMovementHandler : MonoBehaviour
+	{
 
-        private const float SPEED = 50f;
+		private const float SPEED = 50f;
+		private Vector3 lastMoveDir;
 
-        private PlayerMain playerMain;
+		private Vector3 moveDir;
 
-        private Vector3 moveDir;
-        private Vector3 lastMoveDir;
+		private PlayerMain playerMain;
 
-        private void Awake() {
-            playerMain = GetComponent<PlayerMain>();
-        }
+		private void Awake()
+		{
+			playerMain = GetComponent<PlayerMain>();
+		}
 
-        private void Update() {
-            HandleMovement();
-        }
+		private void Update()
+		{
+			HandleMovement();
+		}
 
-        private void HandleMovement() {
-            float moveX = 0f;
-            float moveY = 0f;
+		private void FixedUpdate()
+		{
+			playerMain.PlayerRigidbody2D.velocity = moveDir * SPEED;
+		}
 
-            if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) {
-                moveY = +1f;
-            }
-            if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) {
-                moveY = -1f;
-            }
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) {
-                moveX = -1f;
-            }
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) {
-                moveX = +1f;
-            }
+		private void HandleMovement()
+		{
+			var moveX = 0f;
+			var moveY = 0f;
 
-            moveDir = new Vector3(moveX, moveY).normalized;
+			if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+				moveY = +1f;
+			if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+				moveY = -1f;
+			if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+				moveX = -1f;
+			if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+				moveX = +1f;
 
-            bool isIdle = moveX == 0 && moveY == 0;
-            if (isIdle) {
-                playerMain.PlayerSwapAimNormal.PlayIdleAnim();
-            } else {
-                lastMoveDir = moveDir;
-                playerMain.PlayerSwapAimNormal.PlayMoveAnim(moveDir);
-            }
-        }
+			moveDir = new Vector3(moveX, moveY).normalized;
 
-        private void FixedUpdate() {
-            playerMain.PlayerRigidbody2D.velocity = moveDir * SPEED;
-        }
+			var isIdle = moveX == 0 && moveY == 0;
+			if (isIdle) { playerMain.PlayerSwapAimNormal.PlayIdleAnim(); }
+			else
+			{
+				lastMoveDir = moveDir;
+				playerMain.PlayerSwapAimNormal.PlayMoveAnim(moveDir);
+			}
+		}
 
-        public void Enable() {
-            enabled = true;
-        }
+		public void Enable()
+		{
+			enabled = true;
+		}
 
-        public void Disable() {
-            enabled = false;
-            playerMain.PlayerRigidbody2D.velocity = Vector3.zero;
-        }
+		public void Disable()
+		{
+			enabled = false;
+			playerMain.PlayerRigidbody2D.velocity = Vector3.zero;
+		}
 
-        public Vector3 GetLastMoveDir() {
-            return lastMoveDir;
-        }
-
-    }
+		public Vector3 GetLastMoveDir()
+		{
+			return lastMoveDir;
+		}
+	}
 }

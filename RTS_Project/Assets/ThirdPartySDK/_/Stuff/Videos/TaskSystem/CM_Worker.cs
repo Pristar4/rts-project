@@ -1,21 +1,10 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this Code Monkey project
-    I hope you find it useful in your own projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using V_AnimationSystem;
-
+﻿#region Info
+// -----------------------------------------------------------------------
+// CM_Worker.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
 /*
 namespace CM_TaskSystem {
 
@@ -80,3 +69,4 @@ namespace CM_TaskSystem {
 
 }
 */
+

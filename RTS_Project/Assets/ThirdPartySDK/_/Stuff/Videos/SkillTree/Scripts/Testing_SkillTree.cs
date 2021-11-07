@@ -1,26 +1,21 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// Testing_SkillTree.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class Testing_SkillTree : MonoBehaviour
+{
 
-public class Testing_SkillTree : MonoBehaviour {
+	[SerializeField] private Player player;
+	[SerializeField] private UI_SkillTree uiSkillTree;
 
-    [SerializeField] private Player player;
-    [SerializeField] private UI_SkillTree uiSkillTree;
-
-    private void Start() {
-        //uiSkillTree.SetPlayerSkills(player.GetPlayerSkills());
-    }
-
+	private void Start()
+	{
+		//uiSkillTree.SetPlayerSkills(player.GetPlayerSkills());
+	}
 }

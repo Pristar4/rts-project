@@ -1,195 +1,257 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading the Code Monkey Utilities
-    I hope you find them useful in your projects
-    If you have any questions use the contact form
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
+﻿#region Info
+// -----------------------------------------------------------------------
+// World_Mesh.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
+#endregion
 
-namespace CodeMonkey.Utils {
+namespace CodeMonkey.Utils
+{
 
-    /*
-     * Mesh in the World
-     * */
-    public class World_Mesh {
-        
-        private const int sortingOrderDefault = 5000;
+	/*
+	 * Mesh in the World
+	 * */
+	public class World_Mesh
+	{
 
-        public GameObject gameObject;
-        public Transform transform;
-        private Material material;
-        private Vector3[] vertices;
-        private Vector2[] uv;
-        private int[] triangles;
-        private Mesh mesh;
+		private const int sortingOrderDefault = 5000;
+		private readonly Material material;
+		private readonly Mesh mesh;
+		private readonly int[] triangles;
+		private readonly Vector3[] vertices;
 
-
-        public static World_Mesh Create(Vector3 position, float eulerZ, float meshWidth, float meshHeight, Material material, UVCoords uvCoords, int sortingOrderOffset = 0) {
-            return new World_Mesh(null, position, Vector3.one, eulerZ, meshWidth, meshHeight, material, uvCoords, sortingOrderOffset);
-        }
-
-        public static World_Mesh Create(Vector3 lowerLeftCorner, float width, float height, Material material, UVCoords uvCoords, int sortingOrderOffset = 0) {
-            return Create(lowerLeftCorner, lowerLeftCorner + new Vector3(width, height), material, uvCoords, sortingOrderOffset);
-        }
-
-        public static World_Mesh Create(Vector3 lowerLeftCorner, Vector3 upperRightCorner, Material material, UVCoords uvCoords, int sortingOrderOffset = 0) {
-            float width = upperRightCorner.x - lowerLeftCorner.x;
-            float height = upperRightCorner.y - lowerLeftCorner.y;
-            Vector3 localScale = upperRightCorner - lowerLeftCorner;
-            Vector3 position = lowerLeftCorner + localScale * .5f;
-            return new World_Mesh(null, position, Vector3.one, 0f, width, height, material, uvCoords, sortingOrderOffset);
-        }
+		public GameObject gameObject;
+		public Transform transform;
+		private Vector2[] uv;
 
 
-        private static int GetSortingOrder(Vector3 position, int offset, int baseSortingOrder = sortingOrderDefault) {
-            return (int)(baseSortingOrder - position.y) + offset;
-        }
+		public World_Mesh(Transform parent, Vector3 localPosition,
+		                  Vector3 localScale, float eulerZ, float meshWidth,
+		                  float meshHeight, Material material,
+		                  UVCoords uvCoords,
+		                  int sortingOrderOffset)
+		{
+			this.material = material;
+
+			vertices = new Vector3[4];
+			uv = new Vector2[4];
+			triangles = new int[6];
+
+			/* 0,1
+			 * 1,1
+			 * 0,0
+			 * 1,0
+			 */
+
+			var meshWidthHalf = meshWidth / 2f;
+			var meshHeightHalf = meshHeight / 2f;
+
+			vertices[0] = new Vector3(-meshWidthHalf, meshHeightHalf);
+			vertices[1] = new Vector3(meshWidthHalf, meshHeightHalf);
+			vertices[2] = new Vector3(-meshWidthHalf, -meshHeightHalf);
+			vertices[3] = new Vector3(meshWidthHalf, -meshHeightHalf);
+
+			if (uvCoords == null)
+				uvCoords = new UVCoords(0, 0, material.mainTexture.width,
+						material.mainTexture.height);
+
+			var uvArray = GetUVRectangleFromPixels(uvCoords.x, uvCoords.y,
+					uvCoords.width, uvCoords.height, material.mainTexture.width,
+					material.mainTexture.height);
+
+			ApplyUVToUVArray(uvArray, ref uv);
+
+			triangles[0] = 0;
+			triangles[1] = 1;
+			triangles[2] = 2;
+			triangles[3] = 2;
+			triangles[4] = 1;
+			triangles[5] = 3;
+
+			mesh = new Mesh();
+
+			mesh.vertices = vertices;
+			mesh.uv = uv;
+			mesh.triangles = triangles;
+
+			gameObject
+					= new GameObject("Mesh", typeof(MeshFilter),
+							typeof(MeshRenderer));
+			gameObject.transform.parent = parent;
+			gameObject.transform.localPosition = localPosition;
+			gameObject.transform.localScale = localScale;
+			gameObject.transform.localEulerAngles = new Vector3(0, 0, eulerZ);
+
+			gameObject.GetComponent<MeshFilter>().mesh = mesh;
+			gameObject.GetComponent<MeshRenderer>().material = material;
+
+			transform = gameObject.transform;
+
+			SetSortingOrderOffset(sortingOrderOffset);
+		}
 
 
-        public class UVCoords {
-            public int x, y, width, height;
-            public UVCoords(int x, int y, int width, int height) {
-                this.x = x;
-                this.y = y;
-                this.width = width;
-                this.height = height;
-            }
-        }
+		public static World_Mesh Create(Vector3 position, float eulerZ,
+		                                float meshWidth, float meshHeight,
+		                                Material material, UVCoords uvCoords,
+		                                int sortingOrderOffset = 0)
+		{
+			return new World_Mesh(null, position, Vector3.one, eulerZ,
+					meshWidth,
+					meshHeight, material, uvCoords, sortingOrderOffset);
+		}
+
+		public static World_Mesh Create(Vector3 lowerLeftCorner, float width,
+		                                float height, Material material,
+		                                UVCoords uvCoords,
+		                                int sortingOrderOffset = 0)
+		{
+			return Create(lowerLeftCorner,
+					lowerLeftCorner + new Vector3(width, height), material,
+					uvCoords,
+					sortingOrderOffset);
+		}
+
+		public static World_Mesh Create(Vector3 lowerLeftCorner,
+		                                Vector3 upperRightCorner,
+		                                Material material,
+		                                UVCoords uvCoords,
+		                                int sortingOrderOffset = 0)
+		{
+			var width = upperRightCorner.x - lowerLeftCorner.x;
+			var height = upperRightCorner.y - lowerLeftCorner.y;
+			var localScale = upperRightCorner - lowerLeftCorner;
+			var position = lowerLeftCorner + localScale * .5f;
+			return new World_Mesh(null, position, Vector3.one, 0f, width,
+					height,
+					material, uvCoords, sortingOrderOffset);
+		}
 
 
-        public World_Mesh(Transform parent, Vector3 localPosition, Vector3 localScale, float eulerZ, float meshWidth, float meshHeight, Material material, UVCoords uvCoords, int sortingOrderOffset) {
-            this.material = material;
+		private static int GetSortingOrder(Vector3 position, int offset,
+		                                   int baseSortingOrder
+				                                   = sortingOrderDefault)
+		{
+			return (int)(baseSortingOrder - position.y) + offset;
+		}
 
-            vertices = new Vector3[4];
-            uv = new Vector2[4];
-            triangles = new int[6];
+		private Vector2 ConvertPixelsToUVCoordinates(
+				int x, int y, int textureWidth, int textureHeight)
+		{
+			return new Vector2((float)x / textureWidth,
+					(float)y / textureHeight);
+		}
 
-            /* 0,1
-             * 1,1
-             * 0,0
-             * 1,0
-             */
-            
-            float meshWidthHalf  = meshWidth  / 2f;
-            float meshHeightHalf = meshHeight / 2f;
+		private Vector2[] GetUVRectangleFromPixels(int x, int y, int width,
+		                                           int height, int textureWidth,
+		                                           int textureHeight)
+		{
+			/* 0, 1
+			 * 1, 1
+			 * 0, 0
+			 * 1, 0
+			 * */
+			return new[]
+			{
+				ConvertPixelsToUVCoordinates(x, y + height, textureWidth,
+						textureHeight),
+				ConvertPixelsToUVCoordinates(x + width, y + height,
+						textureWidth,
+						textureHeight),
+				ConvertPixelsToUVCoordinates(x, y, textureWidth, textureHeight),
+				ConvertPixelsToUVCoordinates(x + width, y, textureWidth,
+						textureHeight)
+			};
+		}
 
-            vertices[0] = new Vector3(-meshWidthHalf,  meshHeightHalf);
-            vertices[1] = new Vector3( meshWidthHalf,  meshHeightHalf);
-            vertices[2] = new Vector3(-meshWidthHalf, -meshHeightHalf);
-            vertices[3] = new Vector3( meshWidthHalf, -meshHeightHalf);
-            
-            if (uvCoords == null) {
-                uvCoords = new UVCoords(0, 0, material.mainTexture.width, material.mainTexture.height);
-            }
+		private void ApplyUVToUVArray(Vector2[] uv, ref Vector2[] mainUV)
+		{
+			if (uv == null || uv.Length < 4 || mainUV == null ||
+			    mainUV.Length < 4)
+				throw new Exception();
+			mainUV[0] = uv[0];
+			mainUV[1] = uv[1];
+			mainUV[2] = uv[2];
+			mainUV[3] = uv[3];
+		}
 
-            Vector2[] uvArray = GetUVRectangleFromPixels(uvCoords.x, uvCoords.y, uvCoords.width, uvCoords.height, material.mainTexture.width, material.mainTexture.height);
+		public void SetUVCoords(UVCoords uvCoords)
+		{
+			var uvArray = GetUVRectangleFromPixels(uvCoords.x, uvCoords.y,
+					uvCoords.width, uvCoords.height, material.mainTexture.width,
+					material.mainTexture.height);
+			ApplyUVToUVArray(uvArray, ref uv);
+			mesh.uv = uv;
+		}
 
-            ApplyUVToUVArray(uvArray, ref uv);
+		public void SetSortingOrderOffset(int sortingOrderOffset)
+		{
+			SetSortingOrder(GetSortingOrder(gameObject.transform.position,
+					sortingOrderOffset));
+		}
 
-            triangles[0] = 0;
-            triangles[1] = 1;
-            triangles[2] = 2;
-            triangles[3] = 2;
-            triangles[4] = 1;
-            triangles[5] = 3;
+		public void SetSortingOrder(int sortingOrder)
+		{
+			gameObject.GetComponent<Renderer>().sortingOrder = sortingOrder;
+		}
 
-            mesh = new Mesh();
+		public void SetLocalScale(Vector3 localScale)
+		{
+			transform.localScale = localScale;
+		}
 
-            mesh.vertices = vertices;
-            mesh.uv = uv;
-            mesh.triangles = triangles;
+		public void SetPosition(Vector3 localPosition)
+		{
+			transform.localPosition = localPosition;
+		}
 
-            gameObject = new GameObject("Mesh", typeof(MeshFilter), typeof(MeshRenderer));
-            gameObject.transform.parent = parent;
-            gameObject.transform.localPosition = localPosition;
-            gameObject.transform.localScale = localScale;
-            gameObject.transform.localEulerAngles = new Vector3(0, 0, eulerZ);
+		public void AddPosition(Vector3 addPosition)
+		{
+			transform.localPosition += addPosition;
+		}
 
-            gameObject.GetComponent<MeshFilter>().mesh = mesh;
-            gameObject.GetComponent<MeshRenderer>().material = material;
+		public Vector3 GetPosition()
+		{
+			return transform.localPosition;
+		}
 
-            transform = gameObject.transform;
+		public int GetSortingOrder()
+		{
+			return gameObject.GetComponent<Renderer>().sortingOrder;
+		}
 
-            SetSortingOrderOffset(sortingOrderOffset);
-        }
+		public void Show()
+		{
+			gameObject.SetActive(true);
+		}
 
-        private Vector2 ConvertPixelsToUVCoordinates(int x, int y, int textureWidth, int textureHeight) {
-            return new Vector2((float)x / textureWidth, (float)y / textureHeight);
-        }
+		public void Hide()
+		{
+			gameObject.SetActive(false);
+		}
 
-        private Vector2[] GetUVRectangleFromPixels(int x, int y, int width, int height, int textureWidth, int textureHeight) {
-            /* 0, 1
-             * 1, 1
-             * 0, 0
-             * 1, 0
-             * */
-            return new Vector2[] { 
-                ConvertPixelsToUVCoordinates(x, y + height, textureWidth, textureHeight),
-                ConvertPixelsToUVCoordinates(x + width, y + height, textureWidth, textureHeight),
-                ConvertPixelsToUVCoordinates(x, y, textureWidth, textureHeight),
-                ConvertPixelsToUVCoordinates(x + width, y, textureWidth, textureHeight)
-            };
-        }
+		public void DestroySelf()
+		{
+			Object.Destroy(gameObject);
+		}
 
-        private void ApplyUVToUVArray(Vector2[] uv, ref Vector2[] mainUV) {
-            if (uv == null || uv.Length < 4 || mainUV == null || mainUV.Length < 4) throw new System.Exception();
-            mainUV[0] = uv[0];
-            mainUV[1] = uv[1];
-            mainUV[2] = uv[2];
-            mainUV[3] = uv[3];
-        }
 
-        public void SetUVCoords(UVCoords uvCoords) {
-            Vector2[] uvArray = GetUVRectangleFromPixels(uvCoords.x, uvCoords.y, uvCoords.width, uvCoords.height, material.mainTexture.width, material.mainTexture.height);
-            ApplyUVToUVArray(uvArray, ref uv);
-            mesh.uv = uv;
-        }
-
-        public void SetSortingOrderOffset(int sortingOrderOffset) {
-            SetSortingOrder(GetSortingOrder(gameObject.transform.position, sortingOrderOffset));
-        }
-
-        public void SetSortingOrder(int sortingOrder) {
-            gameObject.GetComponent<Renderer>().sortingOrder = sortingOrder;
-        }
-
-        public void SetLocalScale(Vector3 localScale) {
-            transform.localScale = localScale;
-        }
-
-        public void SetPosition(Vector3 localPosition) {
-            transform.localPosition = localPosition;
-        }
-
-        public void AddPosition(Vector3 addPosition) {
-            transform.localPosition += addPosition;
-        }
-
-        public Vector3 GetPosition() {
-            return transform.localPosition;
-        }
-
-        public int GetSortingOrder() {
-            return gameObject.GetComponent<Renderer>().sortingOrder;
-        }
-
-        public void Show() {
-            gameObject.SetActive(true);
-        }
-
-        public void Hide() {
-            gameObject.SetActive(false);
-        }
-
-        public void DestroySelf() {
-            Object.Destroy(gameObject);
-        }
-
-    }
+		public class UVCoords
+		{
+			public int x, y, width, height;
+			public UVCoords(int x, int y, int width, int height)
+			{
+				this.x = x;
+				this.y = y;
+				this.width = width;
+				this.height = height;
+			}
+		}
+	}
 }

@@ -1,133 +1,139 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
+﻿#region Info
+// -----------------------------------------------------------------------
+// BattleSystem.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using TopDownShooter;
+using UnityEngine;
+#endregion
+public class BattleSystem : MonoBehaviour
+{
 
-public class BattleSystem : MonoBehaviour {
+	[SerializeField] private CaptureOnTriggerEnter2D colliderTrigger;
+	[SerializeField] private Wave[] waveArray;
 
-    public event EventHandler OnBattleStarted;
-    public event EventHandler OnBattleOver;
+	private State state;
 
-    private enum State {
-        Idle,
-        Active,
-        BattleOver,
-    }
-    
-    [SerializeField] private CaptureOnTriggerEnter2D colliderTrigger;
-    [SerializeField] private Wave[] waveArray;
+	private void Awake()
+	{
+		state = State.Idle;
+	}
 
-    private State state;
+	private void Start()
+	{
+		colliderTrigger.OnPlayerTriggerEnter2D
+				+= ColliderTrigger_OnPlayerEnterTrigger;
+	}
 
-    private void Awake() {
-        state = State.Idle;
-    }
+	private void Update()
+	{
+		switch (state)
+		{
+			case State.Active:
+				foreach (var wave in waveArray) wave.Update();
 
-    private void Start() {
-        colliderTrigger.OnPlayerTriggerEnter2D += ColliderTrigger_OnPlayerEnterTrigger;
-    }
+				TestBattleOver();
+				break;
+		}
+	}
 
-    private void ColliderTrigger_OnPlayerEnterTrigger(object sender, System.EventArgs e) {
-        if (state == State.Idle) {
-            StartBattle();
-            colliderTrigger.OnPlayerTriggerEnter2D -= ColliderTrigger_OnPlayerEnterTrigger;
-        }
-    }
+	public event EventHandler OnBattleStarted;
+	public event EventHandler OnBattleOver;
 
-    private void StartBattle() {
-        Debug.Log("StartBattle");
-        state = State.Active;
-        OnBattleStarted?.Invoke(this, EventArgs.Empty);
-    }
+	private void
+			ColliderTrigger_OnPlayerEnterTrigger(object sender, EventArgs e)
+	{
+		if (state == State.Idle)
+		{
+			StartBattle();
+			colliderTrigger.OnPlayerTriggerEnter2D
+					-= ColliderTrigger_OnPlayerEnterTrigger;
+		}
+	}
 
-    private void Update() {
-        switch (state) {
-        case State.Active:
-            foreach (Wave wave in waveArray) {
-                wave.Update();
-            }
+	private void StartBattle()
+	{
+		Debug.Log("StartBattle");
+		state = State.Active;
+		OnBattleStarted?.Invoke(this, EventArgs.Empty);
+	}
 
-            TestBattleOver();
-            break;
-        }
-    }
+	private void TestBattleOver()
+	{
+		if (state == State.Active)
+			if (AreWavesOver())
+			{
+				// Battle is over!
+				state = State.BattleOver;
+				Debug.Log("Battle Over!");
+				OnBattleOver?.Invoke(this, EventArgs.Empty);
+			}
+	}
 
-    private void TestBattleOver() {
-        if (state == State.Active) {
-            if (AreWavesOver()) {
-                // Battle is over!
-                state = State.BattleOver;
-                Debug.Log("Battle Over!");
-                OnBattleOver?.Invoke(this, EventArgs.Empty);
-            }
-        }
-    }
-    
-    private bool AreWavesOver() {
-        foreach (Wave wave in waveArray) {
-            if (wave.IsWaveOver()) {
-                // Wave is over
-            } else {
-                // Wave not over
-                return false;
-            }
-        }
+	private bool AreWavesOver()
+	{
+		foreach (var wave in waveArray)
+			if (wave.IsWaveOver())
+			{
+				// Wave is over
+			}
+			else
+			{
+				// Wave not over
+				return false;
+			}
 
-        return true;
-    }
+		return true;
+	}
+
+	private enum State
+	{
+		Idle,
+		Active,
+		BattleOver
+	}
 
 
-    /*
-     * Represents a single Enemy Spawn Wave
-     * */
-    [System.Serializable]
-    private class Wave {
-        
-        [SerializeField] private EnemySpawn[] enemySpawnArray;
-        [SerializeField] private float timer;
+	/*
+	 * Represents a single Enemy Spawn Wave
+	 * */
+	[Serializable]
+	private class Wave
+	{
 
-        public void Update() {
-            if (timer >= 0) {
-                timer -= Time.deltaTime;
-                if (timer < 0) {
-                    SpawnEnemies();
-                }
-            }
-        }
+		[SerializeField] private EnemySpawn[] enemySpawnArray;
+		[SerializeField] private float timer;
 
-        private void SpawnEnemies() {
-            foreach (EnemySpawn enemySpawn in enemySpawnArray) {
-                enemySpawn.Spawn();
-            }
-        }
+		public void Update()
+		{
+			if (timer >= 0)
+			{
+				timer -= Time.deltaTime;
+				if (timer < 0) SpawnEnemies();
+			}
+		}
 
-        public bool IsWaveOver() {
-            if (timer < 0) {
-                // Wave spawned
-                foreach (EnemySpawn enemySpawn in enemySpawnArray) {
-                    if (enemySpawn.IsAlive()) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                // Enemies haven't spawned yet
-                return false;
-            }
-        }
-    }
+		private void SpawnEnemies()
+		{
+			foreach (var enemySpawn in enemySpawnArray) enemySpawn.Spawn();
+		}
 
+		public bool IsWaveOver()
+		{
+			if (timer < 0)
+			{
+				// Wave spawned
+				foreach (var enemySpawn in enemySpawnArray)
+					if (enemySpawn.IsAlive())
+						return false;
+				return true;
+			}
+			// Enemies haven't spawned yet
+			return false;
+		}
+	}
 }

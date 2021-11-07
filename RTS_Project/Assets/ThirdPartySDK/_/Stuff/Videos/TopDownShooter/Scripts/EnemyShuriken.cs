@@ -1,78 +1,82 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// EnemyShuriken.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
 
-namespace TopDownShooter {
-    public class EnemyShuriken : MonoBehaviour {
+namespace TopDownShooter
+{
+	public class EnemyShuriken : MonoBehaviour
+	{
 
-        private const float MOVE_SPEED = 90f;
+		private const float MOVE_SPEED = 90f;
 
-        public static EnemyShuriken Create(Enemy enemySpawner, Vector3 spawnPosition, Vector3 moveDir) {
-            Transform enemyShurikenTransform = null;// Instantiate(GameAssets.i.pfEnemyShuriken, spawnPosition, Quaternion.identity);
+		private Enemy enemySpawner;
+		private Vector3 moveDir;
+		private Transform particleTransform;
+		private Rigidbody2D shurikenRigidbody2D;
 
-            EnemyShuriken enemyShuriken = enemyShurikenTransform.GetComponent<EnemyShuriken>();
-            enemyShuriken.Setup(enemySpawner, moveDir);
+		private void Awake()
+		{
+			shurikenRigidbody2D = GetComponent<Rigidbody2D>();
+			shurikenRigidbody2D.AddTorque(30f, ForceMode2D.Impulse);
+			particleTransform = transform.Find("ParticleSystem");
+		}
 
-            return enemyShuriken;
-        }
+		private void FixedUpdate()
+		{
+			shurikenRigidbody2D.velocity = moveDir * MOVE_SPEED;
+		}
 
-        private Enemy enemySpawner;
-        private Vector3 moveDir;
-        private Rigidbody2D shurikenRigidbody2D;
-        private Transform particleTransform;
+		private void OnTriggerEnter2D(Collider2D collider)
+		{
+			//int hitLayerMask = ~(1 << GameAssets.i.enemyLayer | 1 << GameAssets.i.ignoreRaycastLayer);
+			var hitLayerMask = ~0;
+			var colliderInLayerMask
+					= ((1 << collider.gameObject.layer) & hitLayerMask) != 0;
+			if (colliderInLayerMask)
+			{
+				// Touching a target layer
+				var player = collider.GetComponent<Player>();
+				if (player != null) player.Damage(enemySpawner, 1f);
+				particleTransform.SetParent(null);
+				particleTransform.GetComponent<ParticleSystem>().Stop();
+				Destroy(particleTransform.gameObject, 1f);
+				Destroy(gameObject);
+				/*
+				GetComponent<Collider2D>().enabled = false;
+				shurikenRigidbody2D.velocity = Vector2.zero;
+				this.enabled = false;
+				transform.Find("Sprite").gameObject.SetActive(false);
+				*/
+			}
+		}
 
-        private void Awake() {
-            shurikenRigidbody2D = GetComponent<Rigidbody2D>();
-            shurikenRigidbody2D.AddTorque(30f, ForceMode2D.Impulse);
-            particleTransform = transform.Find("ParticleSystem");
-        }
+		public static EnemyShuriken Create(Enemy enemySpawner,
+		                                   Vector3 spawnPosition,
+		                                   Vector3 moveDir)
+		{
+			Transform
+					enemyShurikenTransform
+							= null; // Instantiate(GameAssets.i.pfEnemyShuriken, spawnPosition, Quaternion.identity);
 
-        private void Setup(Enemy enemySpawner, Vector3 moveDir) {
-            this.enemySpawner = enemySpawner;
-            this.moveDir = moveDir;
-        }
+			var enemyShuriken
+					= enemyShurikenTransform.GetComponent<EnemyShuriken>();
+			enemyShuriken.Setup(enemySpawner, moveDir);
 
-        private void FixedUpdate() {
-            shurikenRigidbody2D.velocity = moveDir * MOVE_SPEED;
-        }
+			return enemyShuriken;
+		}
 
-        private void OnTriggerEnter2D(Collider2D collider) {
-            //int hitLayerMask = ~(1 << GameAssets.i.enemyLayer | 1 << GameAssets.i.ignoreRaycastLayer);
-            int hitLayerMask = ~0;
-            bool colliderInLayerMask = ((1 << collider.gameObject.layer) & hitLayerMask) != 0;
-            if (colliderInLayerMask) {
-                // Touching a target layer
-                Player player = collider.GetComponent<Player>();
-                if (player != null) {
-                    player.Damage(enemySpawner, 1f);
-                } else {
-                    // Hit something else
-                }
-                particleTransform.SetParent(null);
-                particleTransform.GetComponent<ParticleSystem>().Stop();
-                Destroy(particleTransform.gameObject, 1f);
-                Destroy(gameObject);
-                /*
-                GetComponent<Collider2D>().enabled = false;
-                shurikenRigidbody2D.velocity = Vector2.zero;
-                this.enabled = false;
-                transform.Find("Sprite").gameObject.SetActive(false);
-                */
-            }
-        }
-
-    }
+		private void Setup(Enemy enemySpawner, Vector3 moveDir)
+		{
+			this.enemySpawner = enemySpawner;
+			this.moveDir = moveDir;
+		}
+	}
 
 }

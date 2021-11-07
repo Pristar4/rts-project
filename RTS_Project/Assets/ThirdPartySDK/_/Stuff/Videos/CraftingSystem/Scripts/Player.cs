@@ -1,269 +1,321 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
+﻿#region Info
+// -----------------------------------------------------------------------
+// Player.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using CodeMonkey.Utils;
+#endregion
+public class Player : MonoBehaviour, Enemy.IEnemyTargetable
+{
 
-public class Player : MonoBehaviour, Enemy.IEnemyTargetable {
+	private Inventory inventory;
 
-    public static Player Instance { get; private set; }
+	public static Player Instance { get; private set; }
 
-    public event EventHandler OnGoldAmountChanged;
-    public event EventHandler OnHealthPotionAmountChanged;
-    public event EventHandler OnEquipChanged;
-    
-    private Inventory inventory;
+	public event EventHandler OnGoldAmountChanged;
+	public event EventHandler OnHealthPotionAmountChanged;
+	public event EventHandler OnEquipChanged;
 
-    #region Private
-    [SerializeField] private Texture2D baseSpritesheetTexture;
-    [SerializeField] private Texture2D swordTexture;
-    [SerializeField] private Texture2D swordDarkTexture;
-    [SerializeField] private Texture2D swordWoodTexture;
-    [SerializeField] private Texture2D swordDiamondTexture;
-    [SerializeField] private Texture2D helmetTexture;
-    [SerializeField] private Texture2D chest1Texture;
-    [SerializeField] private Texture2D chest2Texture;
-    [SerializeField] private Texture2D chest3Texture;
+	public void UseItem(Item inventoryItem)
+	{
+		Debug.Log("Use Item: " + inventoryItem);
+	}
 
-    private Player_Base playerBase;
-    private PlayerPunch playerPunch;
-    private PlayerSword playerSword;
-    private Material material;
+	public Inventory GetInventory()
+	{
+		return inventory;
+	}
 
-    private bool helmet;
-    private int chest;
-    private int sword;
+	public void SetEquipment(Item item)
+	{
+		SetEquipment(item.itemType);
+	}
 
-    private int goldAmount;
-    private int healthPotionAmount;
+	public void SetEquipment(Item.ItemType itemType)
+	{
+		// Equip Item
+		switch (itemType)
+		{
+			case Item.ItemType.ArmorNone:
+				EquipArmorNone();
+				break;
+			case Item.ItemType.Armor_1:
+				EquipArmor_1();
+				break;
+			case Item.ItemType.Armor_2:
+				EquipArmor_2();
+				break;
 
-    private void Awake() {
-        Instance = this;
-        playerBase = GetComponent<Player_Base>();
-        playerPunch = GetComponent<PlayerPunch>();
-        playerSword = GetComponent<PlayerSword>();
+			case Item.ItemType.HelmetNone:
+				EquipHelmetNone();
+				break;
+			case Item.ItemType.Helmet:
+				EquipHelmet();
+				break;
 
-        playerBase.enabled = true;
-        playerPunch.enabled = false;
-        playerSword.enabled = false;
+			case Item.ItemType.SwordNone:
+				EquipWeapon_Punch();
+				break;
+			case Item.ItemType.Sword_1:
+				EquipWeapon_Sword();
+				break;
+			case Item.ItemType.Sword_2:
+				EquipWeapon_Sword2();
+				break;
+			case Item.ItemType.Sword_Wood:
+				EquipWeapon_SwordWooden();
+				break;
+			case Item.ItemType.Sword_Diamond:
+				EquipWeapon_SwordDiamond();
+				break;
+		}
+		OnEquipChanged?.Invoke(this, EventArgs.Empty);
+	}
 
-        healthPotionAmount = 1;
-        inventory = new Inventory(UseItem, 14);
-    }
+	#region Private
+	[SerializeField] private Texture2D baseSpritesheetTexture;
+	[SerializeField] private Texture2D swordTexture;
+	[SerializeField] private Texture2D swordDarkTexture;
+	[SerializeField] private Texture2D swordWoodTexture;
+	[SerializeField] private Texture2D swordDiamondTexture;
+	[SerializeField] private Texture2D helmetTexture;
+	[SerializeField] private Texture2D chest1Texture;
+	[SerializeField] private Texture2D chest2Texture;
+	[SerializeField] private Texture2D chest3Texture;
 
-    private void Start() {
-        material = transform.Find("Body").GetComponent<MeshRenderer>().material;
-        baseSpritesheetTexture = material.mainTexture as Texture2D;
+	private Player_Base playerBase;
+	private PlayerPunch playerPunch;
+	private PlayerSword playerSword;
+	private Material material;
 
-        SetEquipment(Item.ItemType.SwordNone);
-        SetEquipment(Item.ItemType.ArmorNone);
-    }
+	private bool helmet;
+	private int chest;
+	private int sword;
 
-    private void FlashColor(Color color) {
-        GetComponent<MaterialTintColor>().SetTintColor(color);
-    }
+	private int goldAmount;
+	private int healthPotionAmount;
 
-    private void UpdateTexture() {
-        UpdateTexture(helmet, chest, sword);
-    }
+	private void Awake()
+	{
+		Instance = this;
+		playerBase = GetComponent<Player_Base>();
+		playerPunch = GetComponent<PlayerPunch>();
+		playerSword = GetComponent<PlayerSword>();
 
-    private void UpdateTexture(bool helmet, int chest, int sword) {
-        Texture2D texture = new Texture2D(512, 512, TextureFormat.RGBA32, true);
+		playerBase.enabled = true;
+		playerPunch.enabled = false;
+		playerSword.enabled = false;
 
-        Color[] spritesheetBasePixels = baseSpritesheetTexture.GetPixels(0, 0, 512, 512);
-        texture.SetPixels(0, 0, 512, 512, spritesheetBasePixels);
-        
-        
-        if (helmet) {
-            texture.SetPixels(0, 384, 384, 128, helmetTexture.GetPixels(0, 0, 384, 128));
-        }
+		healthPotionAmount = 1;
+		inventory = new Inventory(UseItem, 14);
+	}
 
-        switch (chest) {
-        default:
-        case 0:
-            texture.SetPixels(0, 256, 384, 128, chest1Texture.GetPixels(0, 0, 384, 128));
-            break;
-        case 1:
-            texture.SetPixels(0, 256, 384, 128, chest2Texture.GetPixels(0, 0, 384, 128));
-            break;
-        case 2:
-            texture.SetPixels(0, 256, 384, 128, chest3Texture.GetPixels(0, 0, 384, 128));
-            break;
-        }
+	private void Start()
+	{
+		material = transform.Find("Body").GetComponent<MeshRenderer>().material;
+		baseSpritesheetTexture = material.mainTexture as Texture2D;
 
-        switch (sword) {
-        default:
-        case 0:
-            texture.SetPixels(0, 128, 128, 128, swordTexture.GetPixels(0, 0, 128, 128));
-            break;
-        case 1:
-            texture.SetPixels(0, 128, 128, 128, swordDarkTexture.GetPixels(0, 0, 128, 128));
-            break;
-        case 2:
-            texture.SetPixels(0, 128, 128, 128, swordWoodTexture.GetPixels(0, 0, 128, 128));
-            break;
-        case 3:
-            texture.SetPixels(0, 128, 128, 128, swordDiamondTexture.GetPixels(0, 0, 128, 128));
-            break;
-        }
+		SetEquipment(Item.ItemType.SwordNone);
+		SetEquipment(Item.ItemType.ArmorNone);
+	}
 
-        texture.Apply();
+	private void FlashColor(Color color)
+	{
+		GetComponent<MaterialTintColor>().SetTintColor(color);
+	}
 
-        material.mainTexture = texture;
-    }
+	private void UpdateTexture()
+	{
+		UpdateTexture(helmet, chest, sword);
+	}
 
-    public Vector3 GetPosition() {
-        return transform.position;
-    }
+	private void UpdateTexture(bool helmet, int chest, int sword)
+	{
+		var texture = new Texture2D(512, 512, TextureFormat.RGBA32, true);
 
-    public void Damage(Enemy attacker) {
-        Vector3 bloodDir = (GetPosition() - attacker.GetPosition()).normalized;
-        Blood_Handler.SpawnBlood(GetPosition(), bloodDir);
-    }
+		var spritesheetBasePixels
+				= baseSpritesheetTexture.GetPixels(0, 0, 512, 512);
+		texture.SetPixels(0, 0, 512, 512, spritesheetBasePixels);
 
-    public void ConsumeManaPotion() {
-        FlashColor(Color.blue);
-    }
-    #endregion
 
-    #region Equip
-    private void Update() {
-        /*
-        if (Input.GetKeyDown(KeyCode.E)) {
-            TryConsumeHealthPotion();
-        }
-        
-        if (Input.GetKeyDown(KeyCode.T)) {
-            EquipArmor_1();
-        }
-        */
-    }
+		if (helmet)
+			texture.SetPixels(0, 384, 384, 128,
+					helmetTexture.GetPixels(0, 0, 384, 128));
 
-    public void EquipWeapon_Punch() {
-        playerPunch.enabled = true;
-        playerSword.enabled = false;
-    }
+		switch (chest)
+		{
+			default:
+			case 0:
+				texture.SetPixels(0, 256, 384, 128,
+						chest1Texture.GetPixels(0, 0, 384, 128));
+				break;
+			case 1:
+				texture.SetPixels(0, 256, 384, 128,
+						chest2Texture.GetPixels(0, 0, 384, 128));
+				break;
+			case 2:
+				texture.SetPixels(0, 256, 384, 128,
+						chest3Texture.GetPixels(0, 0, 384, 128));
+				break;
+		}
 
-    public void EquipWeapon_Sword() {
-        playerPunch.enabled = false;
-        playerSword.enabled = true;
+		switch (sword)
+		{
+			default:
+			case 0:
+				texture.SetPixels(0, 128, 128, 128,
+						swordTexture.GetPixels(0, 0, 128, 128));
+				break;
+			case 1:
+				texture.SetPixels(0, 128, 128, 128,
+						swordDarkTexture.GetPixels(0, 0, 128, 128));
+				break;
+			case 2:
+				texture.SetPixels(0, 128, 128, 128,
+						swordWoodTexture.GetPixels(0, 0, 128, 128));
+				break;
+			case 3:
+				texture.SetPixels(0, 128, 128, 128,
+						swordDiamondTexture.GetPixels(0, 0, 128, 128));
+				break;
+		}
 
-        sword = 0;
-        UpdateTexture();
-    }
+		texture.Apply();
 
-    public void EquipWeapon_Sword2() {
-        playerPunch.enabled = false;
-        playerSword.enabled = true;
-        
-        sword = 1;
-        UpdateTexture();
-    }
+		material.mainTexture = texture;
+	}
 
-    public void EquipWeapon_SwordWooden() {
-        playerPunch.enabled = false;
-        playerSword.enabled = true;
-        
-        sword = 2;
-        UpdateTexture();
-    }
+	public Vector3 GetPosition()
+	{
+		return transform.position;
+	}
 
-    public void EquipWeapon_SwordDiamond() {
-        playerPunch.enabled = false;
-        playerSword.enabled = true;
-        
-        sword = 3;
-        UpdateTexture();
-    }
+	public void Damage(Enemy attacker)
+	{
+		var bloodDir = (GetPosition() - attacker.GetPosition()).normalized;
+		Blood_Handler.SpawnBlood(GetPosition(), bloodDir);
+	}
 
-    public void EquipArmorNone() {
-        chest = 0;
-        UpdateTexture();
-    }
+	public void ConsumeManaPotion()
+	{
+		FlashColor(Color.blue);
+	}
+	#endregion
 
-    public void EquipArmor_1() {
-        chest = 1;
-        UpdateTexture();
-    }
+	#region Equip
+	private void Update()
+	{
+		/*
+		if (Input.GetKeyDown(KeyCode.E)) {
+		    TryConsumeHealthPotion();
+		}
+		
+		if (Input.GetKeyDown(KeyCode.T)) {
+		    EquipArmor_1();
+		}
+		*/
+	}
 
-    public void EquipArmor_2() {
-        chest = 2;
-        UpdateTexture();
-    }
+	public void EquipWeapon_Punch()
+	{
+		playerPunch.enabled = true;
+		playerSword.enabled = false;
+	}
 
-    public void EquipHelmet() {
-        helmet = true;
-        UpdateTexture();
-    }
+	public void EquipWeapon_Sword()
+	{
+		playerPunch.enabled = false;
+		playerSword.enabled = true;
 
-    public void EquipHelmetNone() {
-        helmet = false;
-        UpdateTexture();
-    }
-    
-    public void TryConsumeHealthPotion() {
-        if (healthPotionAmount > 0) {
-            healthPotionAmount--;
-            OnHealthPotionAmountChanged?.Invoke(this, EventArgs.Empty);
-            FlashColor(Color.green);
-        }
-    }
+		sword = 0;
+		UpdateTexture();
+	}
 
-    public int GetHealthPotionAmount() {
-        return healthPotionAmount;
-    }
+	public void EquipWeapon_Sword2()
+	{
+		playerPunch.enabled = false;
+		playerSword.enabled = true;
 
-    public void AddGoldAmount(int addGoldAmount) {
-        goldAmount += addGoldAmount;
-        OnGoldAmountChanged?.Invoke(this, EventArgs.Empty);
-    }
+		sword = 1;
+		UpdateTexture();
+	}
 
-    public int GetGoldAmount() {
-        return goldAmount;
-    }
-    #endregion
+	public void EquipWeapon_SwordWooden()
+	{
+		playerPunch.enabled = false;
+		playerSword.enabled = true;
 
-    public void UseItem(Item inventoryItem) {
-        Debug.Log("Use Item: " + inventoryItem);
-    }
+		sword = 2;
+		UpdateTexture();
+	}
 
-    public Inventory GetInventory() {
-        return inventory;
-    }
+	public void EquipWeapon_SwordDiamond()
+	{
+		playerPunch.enabled = false;
+		playerSword.enabled = true;
 
-    public void SetEquipment(Item item) {
-        SetEquipment(item.itemType);
-    }
+		sword = 3;
+		UpdateTexture();
+	}
 
-    public void SetEquipment(Item.ItemType itemType) {
-        // Equip Item
-        switch (itemType) {
-        case Item.ItemType.ArmorNone:   EquipArmorNone();       break;
-        case Item.ItemType.Armor_1:     EquipArmor_1();         break;
-        case Item.ItemType.Armor_2:     EquipArmor_2();         break;
+	public void EquipArmorNone()
+	{
+		chest = 0;
+		UpdateTexture();
+	}
 
-        case Item.ItemType.HelmetNone:  EquipHelmetNone();      break;
-        case Item.ItemType.Helmet:      EquipHelmet();          break;
+	public void EquipArmor_1()
+	{
+		chest = 1;
+		UpdateTexture();
+	}
 
-        case Item.ItemType.SwordNone:   EquipWeapon_Punch();    break;
-        case Item.ItemType.Sword_1:     EquipWeapon_Sword();    break;
-        case Item.ItemType.Sword_2:     EquipWeapon_Sword2();   break;
-        case Item.ItemType.Sword_Wood:      EquipWeapon_SwordWooden();   break;
-        case Item.ItemType.Sword_Diamond:   EquipWeapon_SwordDiamond();   break;
-        }
-        OnEquipChanged?.Invoke(this, EventArgs.Empty);
-    }
+	public void EquipArmor_2()
+	{
+		chest = 2;
+		UpdateTexture();
+	}
 
+	public void EquipHelmet()
+	{
+		helmet = true;
+		UpdateTexture();
+	}
+
+	public void EquipHelmetNone()
+	{
+		helmet = false;
+		UpdateTexture();
+	}
+
+	public void TryConsumeHealthPotion()
+	{
+		if (healthPotionAmount > 0)
+		{
+			healthPotionAmount--;
+			OnHealthPotionAmountChanged?.Invoke(this, EventArgs.Empty);
+			FlashColor(Color.green);
+		}
+	}
+
+	public int GetHealthPotionAmount()
+	{
+		return healthPotionAmount;
+	}
+
+	public void AddGoldAmount(int addGoldAmount)
+	{
+		goldAmount += addGoldAmount;
+		OnGoldAmountChanged?.Invoke(this, EventArgs.Empty);
+	}
+
+	public int GetGoldAmount()
+	{
+		return goldAmount;
+	}
+	#endregion
 }

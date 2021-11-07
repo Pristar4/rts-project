@@ -1,9 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// IGetPosition.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public interface IGetPosition
+{
 
-public interface IGetPosition {
-
-    Vector3 GetPosition();
-
+	Vector3 GetPosition();
 }

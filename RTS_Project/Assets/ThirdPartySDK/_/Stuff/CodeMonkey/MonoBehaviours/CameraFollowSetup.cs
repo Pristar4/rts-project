@@ -1,37 +1,41 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-    
-    Thank you for downloading the Code Monkey Utilities
-    I hope you find them useful in your projects
-    If you have any questions use the contact form
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// CameraFollowSetup.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
 
-namespace CodeMonkey.MonoBehaviours {
+namespace CodeMonkey.MonoBehaviours
+{
 
-    /*
-     * Easy set up for CameraFollow, it will follow the transform with zoom
-     * */
-    public class CameraFollowSetup : MonoBehaviour {
+	/*
+	 * Easy set up for CameraFollow, it will follow the transform with zoom
+	 * */
+	public class CameraFollowSetup : MonoBehaviour
+	{
 
-        [SerializeField] private CameraFollow cameraFollow;
-        [SerializeField] private Transform followTransform;
-        [SerializeField] private float zoom;
+		[SerializeField] private CameraFollow cameraFollow;
+		[SerializeField] private Transform followTransform;
+		[SerializeField] private float zoom;
 
-        private void Start() {
-            if (followTransform == null) {
-                Debug.LogError("followTransform is null! Intended?");
-                cameraFollow.Setup(() => Vector3.zero, () => zoom, true, true);
-            } else {
-                cameraFollow.Setup(() => followTransform.position, () => zoom, true, true);
-            }
-        }
-    }
+		private void Start()
+		{
+			if (followTransform == null)
+			{
+				Debug.LogError("followTransform is null! Intended?");
+				cameraFollow.Setup(() => Vector3.zero, () => zoom, true, true);
+			}
+			else
+			{
+				cameraFollow.Setup(() => followTransform.position, () => zoom,
+						true,
+						true);
+			}
+		}
+	}
 
 }

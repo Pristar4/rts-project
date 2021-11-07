@@ -1,5 +1,11 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// FullscreenPlayMode.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+
 /*
 using UnityEditor;
 [InitializeOnLoad]
@@ -73,3 +79,4 @@ public class FullscreenPlayMode : MonoBehaviour {
     }
 }
 //*/
+

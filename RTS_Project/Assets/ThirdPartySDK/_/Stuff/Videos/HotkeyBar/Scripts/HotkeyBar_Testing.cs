@@ -1,46 +1,43 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// HotkeyBar_Testing.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class HotkeyBar_Testing : MonoBehaviour
+{
 
-public class HotkeyBar_Testing : MonoBehaviour {
+	//[SerializeField] private PlayerSwapWeapons player;
+	[SerializeField] private UI_HotkeyBar uiHotkeyBar;
 
-    public static HotkeyBar_Testing Instance { get; private set; }
+	public Sprite pistolSprite;
+	public Sprite shotgunSprite;
+	public Sprite swordSprite;
+	public Sprite punchSprite;
+	public Sprite healthPotionSprite;
+	public Sprite manaPotionSprite;
 
-    //[SerializeField] private PlayerSwapWeapons player;
-    [SerializeField] private UI_HotkeyBar uiHotkeyBar;
+	private HotkeyAbilitySystem hotkeyAbilitySystem;
 
-    public Sprite pistolSprite;
-    public Sprite shotgunSprite;
-    public Sprite swordSprite;
-    public Sprite punchSprite;
-    public Sprite healthPotionSprite;
-    public Sprite manaPotionSprite;
+	public static HotkeyBar_Testing Instance { get; private set; }
 
-    private HotkeyAbilitySystem hotkeyAbilitySystem;
+	private void Awake()
+	{
+		Instance = this;
+	}
 
-    private void Awake() {
-        Instance = this;
-    }
+	private void Start()
+	{
+		hotkeyAbilitySystem = new HotkeyAbilitySystem();
+		uiHotkeyBar.SetHotkeyAbilitySystem(hotkeyAbilitySystem);
+	}
 
-    private void Start() {
-        hotkeyAbilitySystem = new HotkeyAbilitySystem();
-        uiHotkeyBar.SetHotkeyAbilitySystem(hotkeyAbilitySystem);
-    }
-
-    private void Update() {
-        hotkeyAbilitySystem.Update();
-    }
-
+	private void Update()
+	{
+		hotkeyAbilitySystem.Update();
+	}
 }

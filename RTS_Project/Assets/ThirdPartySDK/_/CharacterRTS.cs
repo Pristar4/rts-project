@@ -1,82 +1,105 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿#region Info
+// -----------------------------------------------------------------------
+// CharacterRTS.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using CodeMonkey.Utils;
+using UnityEngine;
+#endregion
+public class CharacterRTS : MonoBehaviour, IGetPosition
+{
 
-public class CharacterRTS : MonoBehaviour, IGetPosition {
+	[SerializeField] private bool isPlayer;
+	private SwordAttack attack;
 
-    [SerializeField] private bool isPlayer;
+	private HealthSystem healthSystem;
+	private IMovePosition movePosition;
+	private GameObject selectedGameObject;
+	private CharacterRTS targetCharacterRTS;
 
-    private HealthSystem healthSystem;
-    private IMovePosition movePosition;
-    private CharacterRTS targetCharacterRTS;
-    private SwordAttack attack;
-    private GameObject selectedGameObject;
+	private void Awake()
+	{
+		healthSystem = new HealthSystem(100);
+		movePosition = GetComponent<IMovePosition>();
+		attack = GetComponent<SwordAttack>();
+		selectedGameObject = transform.Find("Selected").gameObject;
+		SetSelectedGameObjectVisible(false);
+	}
 
-    private void Awake() {
-        healthSystem = new HealthSystem(100);
-        movePosition = GetComponent<IMovePosition>();
-        attack = GetComponent<SwordAttack>();
-        selectedGameObject = transform.Find("Selected").gameObject;
-        SetSelectedGameObjectVisible(false);
-    }
+	private void Start()
+	{
+		SetMovePosition(GetPosition());
+	}
 
-    private void Start() {
-        SetMovePosition(GetPosition());
-    }
+	private void Update()
+	{
+		if (targetCharacterRTS != null)
+		{
+			var attackDistance = 14f;
+			if (Vector3.Distance(GetPosition(),
+					    targetCharacterRTS.GetPosition()) <
+			    attackDistance)
+			{
+				var attackDir
+						= (targetCharacterRTS.GetPosition() - GetPosition())
+						.normalized;
+				FunctionTimer.Create(() => targetCharacterRTS.Damage(this),
+						.05f);
+				enabled = false;
+				attack.Attack(attackDir, () => { enabled = true; });
+			}
+		}
+	}
 
-    public void SetSelectedGameObjectVisible(bool visible) {
-        selectedGameObject.SetActive(visible);
-    }
+	public Vector3 GetPosition()
+	{
+		return transform.position;
+	}
 
-    public void Damage(CharacterRTS attacker) {
-        healthSystem.Damage(56);
+	public void SetSelectedGameObjectVisible(bool visible)
+	{
+		selectedGameObject.SetActive(visible);
+	}
 
-        Vector3 dirFromAttacker = (GetPosition() - attacker.GetPosition()).normalized;
-        Blood_Handler.SpawnBlood(GetPosition(), dirFromAttacker);
+	public void Damage(CharacterRTS attacker)
+	{
+		healthSystem.Damage(56);
 
-        if (healthSystem.IsDead()) {
-            FlyingBody.Create(GameAssets.i.pfEnemyFlyingBody, GetPosition(), dirFromAttacker);
-            Destroy(gameObject);
-        }
-    }
+		var dirFromAttacker
+				= (GetPosition() - attacker.GetPosition()).normalized;
+		Blood_Handler.SpawnBlood(GetPosition(), dirFromAttacker);
 
-    public void SetMovePosition(Vector3 moveTargetPosition) {
-        movePosition.SetMovePosition(moveTargetPosition);
-    }
+		if (healthSystem.IsDead())
+		{
+			FlyingBody.Create(GameAssets.i.pfEnemyFlyingBody, GetPosition(),
+					dirFromAttacker);
+			Destroy(gameObject);
+		}
+	}
 
-    public void SetTarget(CharacterRTS targetCharacterRTS) {
-        this.targetCharacterRTS  = targetCharacterRTS;
+	public void SetMovePosition(Vector3 moveTargetPosition)
+	{
+		movePosition.SetMovePosition(moveTargetPosition);
+	}
 
-        if (targetCharacterRTS != null) {
-            SetMovePosition(targetCharacterRTS.GetPosition());
-        }
-    }
+	public void SetTarget(CharacterRTS targetCharacterRTS)
+	{
+		this.targetCharacterRTS = targetCharacterRTS;
 
-    private void Update() {
-        if (targetCharacterRTS != null) {
-            float attackDistance = 14f;
-            if (Vector3.Distance(GetPosition(), targetCharacterRTS.GetPosition()) < attackDistance) {
-                Vector3 attackDir = (targetCharacterRTS.GetPosition() - GetPosition()).normalized;
-                FunctionTimer.Create(() => targetCharacterRTS.Damage(this), .05f);
-                this.enabled = false;
-                attack.Attack(attackDir, () => {
-                    this.enabled = true;
-                });
-            }
-        }
-    }
+		if (targetCharacterRTS != null)
+			SetMovePosition(targetCharacterRTS.GetPosition());
+	}
 
-    public Vector3 GetPosition() {
-        return transform.position;
-    }
+	public HealthSystem GetHealthSystem()
+	{
+		return healthSystem;
+	}
 
-    public HealthSystem GetHealthSystem() {
-        return healthSystem;
-    }
-
-    public bool IsPlayer() {
-        return isPlayer;
-    }
-
+	public bool IsPlayer()
+	{
+		return isPlayer;
+	}
 }

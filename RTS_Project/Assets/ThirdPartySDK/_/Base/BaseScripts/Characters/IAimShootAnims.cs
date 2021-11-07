@@ -1,25 +1,19 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
+﻿#region Info
+// -----------------------------------------------------------------------
+// IAimShootAnims.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+#endregion
+public interface IAimShootAnims
+{
 
-public interface IAimShootAnims {
+	event EventHandler<CharacterAim_Base.OnShootEventArgs> OnShoot;
 
-    event EventHandler<CharacterAim_Base.OnShootEventArgs> OnShoot;
-
-    void SetAimTarget(Vector3 targetPosition);
-    void ShootTarget(Vector3 targetPosition, Action onShootComplete);
-
+	void SetAimTarget(Vector3 targetPosition);
+	void ShootTarget(Vector3 targetPosition, Action onShootComplete);
 }

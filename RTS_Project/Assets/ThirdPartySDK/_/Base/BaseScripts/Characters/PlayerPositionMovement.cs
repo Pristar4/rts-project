@@ -1,60 +1,59 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System;
-using UnityEngine;
-using V_AnimationSystem;
+﻿#region Info
+// -----------------------------------------------------------------------
+// PlayerPositionMovement.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using CodeMonkey.Utils;
+using UnityEngine;
+#endregion
 
 /*
  * Player movement with TargetPosition
  * */
-public class PlayerPositionMovement : MonoBehaviour {
-    
-    private const float SPEED = 50f;
-    
-    private Player_Base playerBase;
-    private Vector3 targetPosition;
+public class PlayerPositionMovement : MonoBehaviour
+{
 
-    private void Awake() {
-        playerBase = gameObject.GetComponent<Player_Base>();
-    }
+	private const float SPEED = 50f;
 
-    private void Update() {
-        HandleMovement();
+	private Player_Base playerBase;
+	private Vector3 targetPosition;
 
-        if (Input.GetMouseButtonDown(0)) {
-            SetTargetPosition(UtilsClass.GetMouseWorldPosition());
-        }
-    }
+	private void Awake()
+	{
+		playerBase = gameObject.GetComponent<Player_Base>();
+	}
 
-    private void HandleMovement() {
-        if (Vector3.Distance(transform.position, targetPosition) > 1f) {
-            Vector3 moveDir = (targetPosition - transform.position).normalized;
+	private void Update()
+	{
+		HandleMovement();
 
-            playerBase.PlayMoveAnim(moveDir);
-            transform.position += moveDir * SPEED * Time.deltaTime;
-        } else {
-            playerBase.PlayIdleAnim();
-        }
-    }
+		if (Input.GetMouseButtonDown(0))
+			SetTargetPosition(UtilsClass.GetMouseWorldPosition());
+	}
 
-    public Vector3 GetPosition() {
-        return transform.position;
-    }
-        
-    public void SetTargetPosition(Vector3 targetPosition) {
-        targetPosition.z = 0f;
-        this.targetPosition = targetPosition;
-    }
+	private void HandleMovement()
+	{
+		if (Vector3.Distance(transform.position, targetPosition) > 1f)
+		{
+			var moveDir = (targetPosition - transform.position).normalized;
 
+			playerBase.PlayMoveAnim(moveDir);
+			transform.position += moveDir * SPEED * Time.deltaTime;
+		}
+		else { playerBase.PlayIdleAnim(); }
+	}
+
+	public Vector3 GetPosition()
+	{
+		return transform.position;
+	}
+
+	public void SetTargetPosition(Vector3 targetPosition)
+	{
+		targetPosition.z = 0f;
+		this.targetPosition = targetPosition;
+	}
 }

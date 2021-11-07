@@ -1,107 +1,111 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// CharacterController2D.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class CharacterController2D : MonoBehaviour
+{
 
-public class CharacterController2D : MonoBehaviour {
+	private const float MOVE_SPEED = 60f;
 
-    private const float MOVE_SPEED = 60f;
+	[SerializeField] private LayerMask dashLayerMask;
 
-    private enum State {
-        Normal,
-        Rolling,
-    }
+	private Character_Base characterBase;
+	private bool isDashButtonDown;
+	private Vector3 lastMoveDir;
+	private Vector3 moveDir;
+	private Rigidbody2D rigidbody2D;
+	private Vector3 rollDir;
+	private float rollSpeed;
+	private State state;
 
-    [SerializeField] private LayerMask dashLayerMask;
+	private void Awake()
+	{
+		characterBase = GetComponent<Character_Base>();
+		rigidbody2D = GetComponent<Rigidbody2D>();
+		state = State.Normal;
+	}
 
-    private Character_Base characterBase;
-    private Rigidbody2D rigidbody2D;
-    private Vector3 moveDir;
-    private Vector3 rollDir;
-    private Vector3 lastMoveDir;
-    private float rollSpeed;
-    private bool isDashButtonDown;
-    private State state;
+	private void Update()
+	{
+		switch (state)
+		{
+			case State.Normal:
+				var moveX = 0f;
+				var moveY = 0f;
 
-    private void Awake() {
-        characterBase = GetComponent<Character_Base>();
-        rigidbody2D = GetComponent<Rigidbody2D>();
-        state = State.Normal;
-    }
+				if (Input.GetKey(KeyCode.W)) moveY = +1f;
+				if (Input.GetKey(KeyCode.S)) moveY = -1f;
+				if (Input.GetKey(KeyCode.A)) moveX = -1f;
+				if (Input.GetKey(KeyCode.D)) moveX = +1f;
 
-    private void Update() {
-        switch (state) {
-        case State.Normal:
-            float moveX = 0f;
-            float moveY = 0f;
+				moveDir = new Vector3(moveX, moveY).normalized;
+				if (moveX != 0 || moveY != 0) // Not idle
+					lastMoveDir = moveDir;
+				characterBase.PlayMoveAnim(moveDir);
 
-            if (Input.GetKey(KeyCode.W)) {
-                moveY = +1f;
-            }
-            if (Input.GetKey(KeyCode.S)) {
-                moveY = -1f;
-            }
-            if (Input.GetKey(KeyCode.A)) {
-                moveX = -1f;
-            }
-            if (Input.GetKey(KeyCode.D)) {
-                moveX = +1f;
-            }
+				if (Input.GetKeyDown(KeyCode.F)) isDashButtonDown = true;
 
-            moveDir = new Vector3(moveX, moveY).normalized;
-            if (moveX != 0 || moveY != 0) {
-                // Not idle
-                lastMoveDir = moveDir;
-            }
-            characterBase.PlayMoveAnim(moveDir);
+				if (Input.GetKeyDown(KeyCode.Space))
+				{
+					rollDir = lastMoveDir;
+					rollSpeed = 250f;
+					state = State.Rolling;
+					characterBase.PlayRollAnimation(rollDir);
+				}
+				break;
+			case State.Rolling:
+				var rollSpeedDropMultiplier = 5f;
+				rollSpeed -= rollSpeed * rollSpeedDropMultiplier *
+				             Time.deltaTime;
 
-            if (Input.GetKeyDown(KeyCode.F)) {
-                isDashButtonDown = true;
-            }
+				var rollSpeedMinimum = 50f;
+				if (rollSpeed < rollSpeedMinimum) state = State.Normal;
+				break;
+		}
+	}
 
-            if (Input.GetKeyDown(KeyCode.Space)) {
-                rollDir = lastMoveDir;
-                rollSpeed = 250f;
-                state = State.Rolling;
-                characterBase.PlayRollAnimation(rollDir);
-            }
-            break;
-        case State.Rolling:
-            float rollSpeedDropMultiplier = 5f;
-            rollSpeed -= rollSpeed * rollSpeedDropMultiplier * Time.deltaTime;
+	private void FixedUpdate()
+	{
+		switch (state)
+		{
+			case State.Normal:
+				rigidbody2D.velocity = moveDir * MOVE_SPEED;
 
-            float rollSpeedMinimum = 50f;
-            if (rollSpeed < rollSpeedMinimum) {
-                state = State.Normal;
-            }
-            break;
-        }
-    }
+				if (isDashButtonDown)
+				{
+					var dashAmount = 50f;
+					var dashPosition
+							= transform.position + lastMoveDir * dashAmount;
 
-    private void FixedUpdate() {
-        switch (state) {
-        case State.Normal:
-            rigidbody2D.velocity = moveDir * MOVE_SPEED;
+					var raycastHit2d = Physics2D.Raycast(transform.position,
+							lastMoveDir,
+							dashAmount, dashLayerMask);
+					if (raycastHit2d.collider != null)
+						dashPosition = raycastHit2d.point;
 
-            if (isDashButtonDown) {
-                float dashAmount = 50f;
-                Vector3 dashPosition = transform.position + lastMoveDir * dashAmount;
+					// Spawn visual effect
+					DashEffect.CreateDashEffect(transform.position, lastMoveDir,
+							Vector3.Distance(transform.position, dashPosition));
 
-                RaycastHit2D raycastHit2d = Physics2D.Raycast(transform.position, lastMoveDir, dashAmount, dashLayerMask);
-                if (raycastHit2d.collider != null) {
-                    dashPosition = raycastHit2d.point;
-                }
+					rigidbody2D.MovePosition(dashPosition);
+					isDashButtonDown = false;
+				}
+				break;
+			case State.Rolling:
+				rigidbody2D.velocity = rollDir * rollSpeed;
+				break;
+		}
+	}
 
-                // Spawn visual effect
-                DashEffect.CreateDashEffect(transform.position, lastMoveDir, Vector3.Distance(transform.position, dashPosition));
-
-                rigidbody2D.MovePosition(dashPosition);
-                isDashButtonDown = false;
-            }
-            break;
-        case State.Rolling:
-            rigidbody2D.velocity = rollDir * rollSpeed;
-            break;
-        }
-    }
-
+	private enum State
+	{
+		Normal,
+		Rolling
+	}
 }

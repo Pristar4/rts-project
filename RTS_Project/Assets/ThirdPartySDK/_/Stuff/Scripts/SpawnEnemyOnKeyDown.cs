@@ -1,22 +1,34 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿#region Info
+// -----------------------------------------------------------------------
+// SpawnEnemyOnKeyDown.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using CodeMonkey.Utils;
+using UnityEngine;
+#endregion
+public class SpawnEnemyOnKeyDown : MonoBehaviour
+{
 
-public class SpawnEnemyOnKeyDown : MonoBehaviour {
+	[SerializeField] private Transform pfEnemyTransform;
 
-    [SerializeField] private Transform pfEnemyTransform;
-
-    private void Update() {
-        if (Input.GetKeyDown(KeyCode.M)) {
-            int spawnCount = 5;
-            Vector3 spawnPosition = Vector3.zero;
-            float radiusMin = 50f;
-            float radiusMax = 150f;
-            for (int i = 0; i < spawnCount; i++) {
-                Transform enemyTransform = Instantiate(pfEnemyTransform, spawnPosition + UtilsClass.GetRandomDir() * Random.Range(radiusMin, radiusMax), Quaternion.identity);
-            }
-        }
-    }
-
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.M))
+		{
+			var spawnCount = 5;
+			var spawnPosition = Vector3.zero;
+			var radiusMin = 50f;
+			var radiusMax = 150f;
+			for (var i = 0; i < spawnCount; i++)
+			{
+				var enemyTransform = Instantiate(pfEnemyTransform,
+						spawnPosition + UtilsClass.GetRandomDir() *
+						Random.Range(radiusMin, radiusMax),
+						Quaternion.identity);
+			}
+		}
+	}
 }

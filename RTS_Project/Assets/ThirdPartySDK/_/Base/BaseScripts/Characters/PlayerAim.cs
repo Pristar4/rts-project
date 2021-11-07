@@ -1,118 +1,120 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
- 
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-using V_AnimationSystem;
+﻿#region Info
+// -----------------------------------------------------------------------
+// PlayerAim.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using CodeMonkey.Utils;
+using UnityEngine;
+#endregion
+public class PlayerAim : MonoBehaviour, Enemy.IEnemyTargetable,
+		EnemyHandler.IEnemyTargetable, EnemyAim.IEnemyTargetable
+{
 
-public class PlayerAim : MonoBehaviour, Enemy.IEnemyTargetable, EnemyHandler.IEnemyTargetable, EnemyAim.IEnemyTargetable {
-    
-    public static PlayerAim instance;
+	private const float SPEED = 50f;
+	private const float FIRE_RATE = .15f;
 
-    private const float SPEED = 50f;
-    private const float FIRE_RATE = .15f;
+	public static PlayerAim instance;
+	private HealthSystem healthSystem;
+	private float nextShootTime;
 
-    private CharacterAim_Base playerBase;
-    private float nextShootTime;
-    private State state;
-    private HealthSystem healthSystem;
+	private CharacterAim_Base playerBase;
+	private State state;
 
-    private enum State {
-        Normal,
-    }
+	private void Awake()
+	{
+		instance = this;
+		playerBase = gameObject.GetComponent<CharacterAim_Base>();
+		healthSystem = new HealthSystem(100);
+		SetStateNormal();
+	}
 
-    private void Awake() {
-        instance = this;
-        playerBase = gameObject.GetComponent<CharacterAim_Base>();
-        healthSystem = new HealthSystem(100);
-        SetStateNormal();
-    }
+	private void Update()
+	{
+		switch (state)
+		{
+			case State.Normal:
+				HandleAimShooting();
+				HandleMovement();
+				break;
+		}
+	}
 
-    private void Update() {
-        switch (state) {
-        case State.Normal:
-            HandleAimShooting();
-            HandleMovement();
-            break;
-        }
-    }
-    
-    private void SetStateNormal() {
-        state = State.Normal;
-    }
+	public Vector3 GetPosition()
+	{
+		return transform.position;
+	}
 
-    private void HandleAimShooting() {
-        Vector3 targetPosition = UtilsClass.GetMouseWorldPosition();
-        playerBase.SetAimTarget(targetPosition);
+	public void Damage(Enemy enemy) { }
 
-        if (Input.GetMouseButton(0) && Time.time >= nextShootTime) {
-            nextShootTime = Time.time + FIRE_RATE;
-            playerBase.ShootTarget(targetPosition);
-        }
-    }
+	public void Damage(EnemyHandler enemy) { }
 
-    private void HandleMovement() {
-        float moveX = 0f;
-        float moveY = 0f;
+	public void Damage(EnemyAim attacker)
+	{
+		var bloodDir = (GetPosition() - attacker.GetPosition()).normalized;
+		Blood_Handler.SpawnBlood(GetPosition(), bloodDir);
 
-        if (Input.GetKey(KeyCode.W)) {
-            moveY = +1f;
-        }
-        if (Input.GetKey(KeyCode.S)) {
-            moveY = -1f;
-        }
-        if (Input.GetKey(KeyCode.A)) {
-            moveX = -1f;
-        }
-        if (Input.GetKey(KeyCode.D)) {
-            moveX = +1f;
-        }
+		healthSystem.Damage(1);
+		if (IsDead())
+		{
+			FlyingBody.Create(GameAssets.i.pfEnemyFlyingBody, GetPosition(),
+					bloodDir);
+			playerBase.DestroySelf();
+			Destroy(gameObject);
+		}
+		else
+		{
+			// Knockback
+			transform.position += bloodDir * 2.5f;
+		}
+	}
 
-        Vector3 moveDir = new Vector3(moveX, moveY).normalized;
-        bool isIdle = moveX == 0 && moveY == 0;
-        if (isIdle) {
-            playerBase.PlayIdleAnim();
-        } else {
-            playerBase.PlayMoveAnim(moveDir);
-            transform.position += moveDir * SPEED * Time.deltaTime;
-        }
-    }
+	private void SetStateNormal()
+	{
+		state = State.Normal;
+	}
 
-    public Vector3 GetPosition() {
-        return transform.position;
-    }
+	private void HandleAimShooting()
+	{
+		var targetPosition = UtilsClass.GetMouseWorldPosition();
+		playerBase.SetAimTarget(targetPosition);
 
-    public bool IsDead() {
-        return healthSystem.IsDead();
-    }
+		if (Input.GetMouseButton(0) && Time.time >= nextShootTime)
+		{
+			nextShootTime = Time.time + FIRE_RATE;
+			playerBase.ShootTarget(targetPosition);
+		}
+	}
 
-    public void Damage(Enemy enemy) { }
+	private void HandleMovement()
+	{
+		var moveX = 0f;
+		var moveY = 0f;
 
-    public void Damage(EnemyHandler enemy) { }
+		if (Input.GetKey(KeyCode.W)) moveY = +1f;
+		if (Input.GetKey(KeyCode.S)) moveY = -1f;
+		if (Input.GetKey(KeyCode.A)) moveX = -1f;
+		if (Input.GetKey(KeyCode.D)) moveX = +1f;
 
-    public void Damage(EnemyAim attacker) { 
-        Vector3 bloodDir = (GetPosition() - attacker.GetPosition()).normalized;
-        Blood_Handler.SpawnBlood(GetPosition(), bloodDir);
+		var moveDir = new Vector3(moveX, moveY).normalized;
+		var isIdle = moveX == 0 && moveY == 0;
+		if (isIdle) { playerBase.PlayIdleAnim(); }
+		else
+		{
+			playerBase.PlayMoveAnim(moveDir);
+			transform.position += moveDir * SPEED * Time.deltaTime;
+		}
+	}
 
-        healthSystem.Damage(1);
-        if (IsDead()) {
-            FlyingBody.Create(GameAssets.i.pfEnemyFlyingBody, GetPosition(), bloodDir);
-            playerBase.DestroySelf();
-            Destroy(gameObject);
-        } else {
-            // Knockback
-            transform.position += bloodDir * 2.5f;
-        }
-    }
+	public bool IsDead()
+	{
+		return healthSystem.IsDead();
+	}
+
+	private enum State
+	{
+		Normal
+	}
 }

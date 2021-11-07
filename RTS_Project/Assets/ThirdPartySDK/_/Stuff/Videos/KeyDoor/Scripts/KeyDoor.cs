@@ -1,39 +1,37 @@
-﻿/* 
-    ------------------- Code Monkey -------------------
-
-    Thank you for downloading this package
-    I hope you find it useful in your projects
-    If you have any questions let me know
-    Cheers!
-
-               unitycodemonkey.com
-    --------------------------------------------------
- */
-
-using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// KeyDoor.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class KeyDoor : MonoBehaviour
+{
 
-public class KeyDoor : MonoBehaviour {
+	[SerializeField] private Key.KeyType keyType;
 
-    [SerializeField] private Key.KeyType keyType;
+	private DoorAnims doorAnims;
 
-    private DoorAnims doorAnims;
+	private void Awake()
+	{
+		doorAnims = GetComponent<DoorAnims>();
+	}
 
-    private void Awake() {
-        doorAnims = GetComponent<DoorAnims>();
-    }
+	public Key.KeyType GetKeyType()
+	{
+		return keyType;
+	}
 
-    public Key.KeyType GetKeyType() {
-        return keyType;
-    }
+	public void OpenDoor()
+	{
+		doorAnims.OpenDoor();
+	}
 
-    public void OpenDoor() {
-        doorAnims.OpenDoor();
-    }
-
-    public void PlayOpenFailAnim() {
-        doorAnims.PlayOpenFailAnim();
-    }
-
+	public void PlayOpenFailAnim()
+	{
+		doorAnims.PlayOpenFailAnim();
+	}
 }

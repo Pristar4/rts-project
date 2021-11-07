@@ -1,32 +1,37 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿#region Info
+// -----------------------------------------------------------------------
+// BlurAnimated.cs
+// 
+// Felix Jung 07.11.2021
+// -----------------------------------------------------------------------
+#endregion
+#region
 using UnityEngine;
+#endregion
+public class BlurAnimated : MonoBehaviour
+{
 
-public class BlurAnimated : MonoBehaviour {
+	[SerializeField] private Material material;
+	private bool blurActive;
 
-    [SerializeField] private Material material;
+	private float blurAmount;
 
-    private float blurAmount;
-    private bool blurActive;
+	private void Start()
+	{
+		blurAmount = 0;
+	}
 
-    private void Start() {
-        blurAmount = 0;
-    }
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.T)) blurActive = !blurActive;
 
-    private void Update() {
-        if (Input.GetKeyDown(KeyCode.T)) {
-            blurActive = !blurActive;
-        }
+		var blurSpeed = 15f;
+		if (blurActive)
+			blurAmount += blurSpeed * Time.deltaTime;
+		else
+			blurAmount -= blurSpeed * Time.deltaTime;
 
-        float blurSpeed = 15f;
-        if (blurActive) {
-            blurAmount += blurSpeed * Time.deltaTime;
-        } else {
-            blurAmount -= blurSpeed * Time.deltaTime;
-        }
-
-        blurAmount = Mathf.Clamp(blurAmount, 0f, 4f);
-        material.SetFloat("_BlurAmount", blurAmount);
-    }
-
+		blurAmount = Mathf.Clamp(blurAmount, 0f, 4f);
+		material.SetFloat("_BlurAmount", blurAmount);
+	}
 }
